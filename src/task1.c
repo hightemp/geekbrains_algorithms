@@ -317,6 +317,9 @@ void fnTask14()
 int main(void) {
 
 	int iSel = 0;
+
+	printf("Author: Anton Panov\n");
+
 	do
 	{
 		printf("\nSelect task:");
