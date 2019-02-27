@@ -318,7 +318,7 @@ int main(void) {
 
 	int iSel = 0;
 
-	printf("Author: Anton Panov\n");
+	printf("Author: Anton Panov \n");
 
 	do
 	{
