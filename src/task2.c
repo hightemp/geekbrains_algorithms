@@ -76,63 +76,64 @@ void fnTask2()
 unsigned int fnGetVariants()
 {
 	unsigned int auiCount[100] = {0};
-	unsigned int auiResult[100] = {0};
-	unsigned int auiIndexes[100] = {0};
+	unsigned int auiCommand[100] = {0};
+	unsigned int auiSum[100] = {0};
+	unsigned int auiN[100] = {0};
+	unsigned int auiCountIndex[100] = {0};
 	unsigned int uiIndex = 0;
 	unsigned int uiIndexesIndex = 0;
 	unsigned int uiCommand = 1;
 	unsigned int uiNumber = 3;
 
-	//while (uiCommand<3) {
+	//do {
 		//if () {
 
 		//}
 
-	//}
+	//} while();
 
-	return 0;
+	unsigned int uiCountCount = 0;
+
+	for (int iIndex=0; iIndex<100; iIndex++) {
+		if (auiCount[iIndex]>0) {
+			uiCountCount++;
+		}
+	}
+
+	return uiCountCount;
 }
 
 unsigned int fnGetVariantsRecursion(unsigned int uiN, unsigned int uiCountIndex, unsigned int uiCount, unsigned int iCommand)
 {
-	static unsigned int auiCount[100] = {0};
+	static unsigned int auiCount[1000] = {0};
+
+	if (uiN==20) {
+		auiCount[uiCountIndex] = uiCount;
+		return uiCountIndex;
+	} else if (uiN>20) {
+		auiCount[uiCountIndex] = 0;
+		return uiCountIndex;
+	}
 
 	if (iCommand==1) {
-		if (uiN==20) {
-			auiCount[uiCountIndex] = uiCount;
-			return uiCountIndex;
-		} else if (uiN>20) {
-			auiCount[uiCountIndex] = 0;
-			return uiCountIndex;
-		} else {
-			uiN += 1;
-			uiCount++;
-			auiCount[uiCountIndex] = uiCount;
-		}
+		uiN += 1;
+		uiCount++;
+		auiCount[uiCountIndex] = uiCount;
 	}
 	if (iCommand==2) {
-		if (uiN==20) {
-			auiCount[uiCountIndex] = uiCount;
-			return uiCountIndex;
-		} else if (uiN>20) {
-			auiCount[uiCountIndex] = 0;
-			return uiCountIndex;
-		} else {
-			uiN *= 2;
-			uiCount++;
-			auiCount[uiCountIndex] = uiCount;
-			uiCountIndex++;
-		}
+		uiN *= 2;
+		uiCount++;
+		uiCountIndex++;
+		auiCount[uiCountIndex] = uiCount;
 	}
 
 	uiCountIndex = fnGetVariantsRecursion(uiN, uiCountIndex, uiCount, 1);
-	fnGetVariantsRecursion(uiN, uiCountIndex, uiCount, 2);
+	uiCountIndex = fnGetVariantsRecursion(uiN, uiCountIndex, uiCount, 2);
 
-	if (uiCountIndex==0) {
+	if (iCommand==0) {
 		unsigned int uiCountCount = 0;
 
-		for (int iIndex=0; iIndex<100; iIndex++) {
-			printf("%d ", auiCount[iIndex]);
+		for (int iIndex=0; iIndex<1000; iIndex++) {
 			if (auiCount[iIndex]>0) {
 				uiCountCount++;
 			}
