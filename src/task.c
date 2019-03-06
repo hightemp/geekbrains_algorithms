@@ -193,7 +193,7 @@ int fnShakerSort(int aiArray[10])
 			iOperations += 2;
 
 			iOperations += 1;
-			if (aiArray[iIndex-1]<aiArray[iIndex]) {
+			if (aiArray[iIndex-1]>aiArray[iIndex]) {
 				int Temp = aiArray[iIndex];
 				aiArray[iIndex] = aiArray[iIndex-1];
 				aiArray[iIndex-1] = Temp;
