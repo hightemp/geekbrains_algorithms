@@ -221,8 +221,35 @@ void fnTask2()
 	printf("shaker sort operations: %d\n", fnShakerSort(aiArray1));
 }
 
+int fnBinarySearch(int aiArray[10], int iNumber)
+{
+	int iMiddleIndex = 10/2;
+	int iLeftIndex = 0, iRightIndex = 9;
+
+	do {
+		if (aiArray[iMiddleIndex]<iNumber) {
+			iLeftIndex = iMiddleIndex;
+			iMiddleIndex = (iRightIndex - iLeftIndex)/2;
+		} else if (aiArray[iMiddleIndex]>iNumber) {
+			iRightIndex = iMiddleIndex;
+			iMiddleIndex = (iRightIndex - iLeftIndex)/2;
+		}
+
+		if (aiArray[iMiddleIndex]==iNumber) {
+			return iMiddleIndex;
+		}
+	} while (iRightIndex-iLeftIndex>1);
+
+	return -1;
+}
+
 void fnTask3()
 {
+	int aiArray1[10] = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+
+	printf("binary search number 5 index: %d\n", fnBinarySearch(aiArray1, 5));
+	printf("binary search number 45 index: %d\n", fnBinarySearch(aiArray1, 45));
+	printf("binary search number 7 index: %d\n", fnBinarySearch(aiArray1, 7));
 }
 
 int main(void) {
