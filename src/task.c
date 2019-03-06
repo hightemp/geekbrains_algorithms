@@ -33,6 +33,93 @@ int fnBubbleSort(int aiArray[10])
 	printf("\n");
 
 	int iOperations = 0;
+	int iSwapped = 0;
+	iOperations += 1;
+
+	do {
+		iSwapped = 0;
+		iOperations += 1;
+
+		for (int iIndex=0; iIndex<9; iIndex++) {
+			iOperations += 2;
+
+			iOperations += 1;
+			if (aiArray[iIndex]>aiArray[iIndex+1]) {
+				int Temp = aiArray[iIndex+1];
+				aiArray[iIndex+1] = aiArray[iIndex];
+				aiArray[iIndex] = Temp;
+
+				iSwapped = 1;
+
+				iOperations += 6;
+			}
+		}
+
+		iOperations += 1;
+	} while (iSwapped);
+
+	printf("after sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
+	return iOperations;
+}
+
+int fnOptimizedBubbleSort(int aiArray[10])
+{
+	printf("before sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
+	int iOperations = 0;
+
+	int iLastSwap = 0;
+	int iCurrentSwap = 10;
+
+	do {
+		iLastSwap = 0;
+
+		for (int iIndex=1; iIndex<iCurrentSwap; iIndex++) {
+			iOperations += 2;
+
+			iOperations += 1;
+			if (aiArray[iIndex-1]>aiArray[iIndex]) {
+				int Temp = aiArray[iIndex-1];
+				aiArray[iIndex-1] = aiArray[iIndex];
+				aiArray[iIndex] = Temp;
+				iOperations += 5;
+				iLastSwap = iIndex;
+			}
+		}
+
+		iOperations += 1;
+		iCurrentSwap = iLastSwap;
+
+		iOperations += 1;
+	} while(iCurrentSwap);
+
+	printf("after sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
+	return iOperations;
+}
+
+int fnOptimizedBubbleSort2(int aiArray[10])
+{
+	printf("before sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
+	int iOperations = 0;
 
 	for (int iIndex=0; iIndex<9; iIndex++) {
 		iOperations += 2;
@@ -62,20 +149,15 @@ int fnBubbleSort(int aiArray[10])
 	return iOperations;
 }
 
-int fnOptimizedBubbleSort(int aiArray[10])
-{
-	int iOperations = 0;
-
-	return iOperations;
-}
-
 void fnTask1()
 {
-	int aiArray[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	//int aiArray2[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	int aiArray2[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	int aiArray3[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
 
-	printf("bubble sort operations: %d\n", fnBubbleSort(aiArray));
-	printf("optimized bubble sort operations: %d\n", fnOptimizedBubbleSort(aiArray));
+	printf("bubble sort operations: %d\n", fnBubbleSort(aiArray1));
+	printf("optimized bubble sort operations: %d\n", fnOptimizedBubbleSort(aiArray2));
+	printf("optimized bubble sort 2 operations: %d\n", fnOptimizedBubbleSort2(aiArray3));
 }
 
 void fnTask2()
