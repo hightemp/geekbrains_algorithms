@@ -26,6 +26,12 @@
 
 int fnBubbleSort(int aiArray[10])
 {
+	printf("before sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
 	int iOperations = 0;
 
 	for (int iIndex=0; iIndex<9; iIndex++) {
@@ -33,12 +39,25 @@ int fnBubbleSort(int aiArray[10])
 
 		iOperations += 1;
 		if (aiArray[iIndex]>aiArray[iIndex+1]) {
-			int iTempIndex = iIndex;
+			int iTempIndex = iIndex+1;
+			iOperations += 2;
+
 			do {
-				aiArray[iTempIndex] S
-			} while (aiArray[iIndex]>aiArray[iIndex+1])
+				int Temp = aiArray[iTempIndex];
+				aiArray[iTempIndex] = aiArray[iTempIndex-1];
+				aiArray[iTempIndex-1] = Temp;
+				iTempIndex--;
+
+				iOperations += 9;
+			} while (iTempIndex>0 && aiArray[iTempIndex-1]>aiArray[iTempIndex]);
 		}
 	}
+
+	printf("after sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
 
 	return iOperations;
 }
@@ -55,8 +74,8 @@ void fnTask1()
 	int aiArray[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
 	//int aiArray2[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
 
-	printf("bubble sort operations: $d\n", fnBubbleSort(aiArray));
-	printf("optimized bubble sort operations: $d\n", fnBubbleSort(aiArray));
+	printf("bubble sort operations: %d\n", fnBubbleSort(aiArray));
+	printf("optimized bubble sort operations: %d\n", fnOptimizedBubbleSort(aiArray));
 }
 
 void fnTask2()
@@ -66,8 +85,6 @@ void fnTask2()
 
 void fnTask3()
 {
-	printf("a) variants: %u\n", fnGetVariants());
-	printf("b) variants: %u\n", fnGetVariantsRecursion(3, 0, 0, 0));
 }
 
 int main(void) {
