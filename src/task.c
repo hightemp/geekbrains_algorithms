@@ -229,10 +229,10 @@ int fnBinarySearch(int aiArray[10], int iNumber)
 	do {
 		if (aiArray[iMiddleIndex]<iNumber) {
 			iLeftIndex = iMiddleIndex;
-			iMiddleIndex = (iRightIndex - iLeftIndex)/2;
+			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
 		} else if (aiArray[iMiddleIndex]>iNumber) {
 			iRightIndex = iMiddleIndex;
-			iMiddleIndex = (iRightIndex - iLeftIndex)/2;
+			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
 		}
 
 		if (aiArray[iMiddleIndex]==iNumber) {
@@ -250,6 +250,7 @@ void fnTask3()
 	printf("binary search number 5 index: %d\n", fnBinarySearch(aiArray1, 5));
 	printf("binary search number 45 index: %d\n", fnBinarySearch(aiArray1, 45));
 	printf("binary search number 7 index: %d\n", fnBinarySearch(aiArray1, 7));
+	printf("binary search number 30 index: %d\n", fnBinarySearch(aiArray1, 30));
 }
 
 int main(void) {
