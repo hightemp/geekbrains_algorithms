@@ -160,9 +160,65 @@ void fnTask1()
 	printf("optimized bubble sort 2 operations: %d\n", fnOptimizedBubbleSort2(aiArray3));
 }
 
+int fnShakerSort(int aiArray[10])
+{
+	printf("before sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
+	int iOperations = 0;
+
+	iOperations += 2;
+	for (int iLeftIndex=0, iRightIndex=9; iLeftIndex<iRightIndex;) {
+		iOperations += 1;
+
+		for (int iIndex=iLeftIndex; iIndex<iRightIndex; iIndex++) {
+			iOperations += 2;
+
+			iOperations += 1;
+			if (aiArray[iIndex+1]<aiArray[iIndex]) {
+				int Temp = aiArray[iIndex];
+				aiArray[iIndex] = aiArray[iIndex+1];
+				aiArray[iIndex+1] = Temp;
+
+				iOperations += 5;
+			}
+		}
+		iOperations += 1;
+		iRightIndex--;
+
+		for (int iIndex=iRightIndex; iIndex>iLeftIndex; iIndex--) {
+			iOperations += 2;
+
+			iOperations += 1;
+			if (aiArray[iIndex-1]<aiArray[iIndex]) {
+				int Temp = aiArray[iIndex];
+				aiArray[iIndex] = aiArray[iIndex-1];
+				aiArray[iIndex-1] = Temp;
+
+				iOperations += 5;
+			}
+		}
+		iOperations += 1;
+		iLeftIndex++;
+	}
+
+	printf("after sort: ");
+	for (int iIndex=0; iIndex<10; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+
+	return iOperations;
+}
+
 void fnTask2()
 {
+	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
 
+	printf("shaker sort operations: %d\n", fnShakerSort(aiArray1));
 }
 
 void fnTask3()
