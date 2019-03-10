@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name        : task1.c
+ Name        : task.c
  Author      : Anton PAnov
  ============================================================================
  */
@@ -10,250 +10,195 @@
 #include <math.h>
 
 /**
- * 1. 1. Попробовать оптимизировать пузырьковую сортировку.
- * Сравнить количество операций сравнения оптимизированной и не оптимизированной программы.
- * Написать функции сортировки, которые возвращают количество операций.
- * 2. *Реализовать шейкерную сортировку.
- * 3. Реализовать бинарный алгоритм поиска в виде функции,
- * которой передается отсортированный массив.
- * Функция возвращает индекс найденного элемента или -1, если элемент не найден.
- * 4. *Подсчитать количество операций для каждой из сортировок и сравнить его с асимптотической сложностью алгоритма.
+ * 1. *Количество маршрутов с препятствиями. Реализовать чтение массива с препятствием и нахождение количество маршрутов.
+ * Например, карта:
+ * 3 3
+ * 1 1 1
+ * 0 1 0
+ * 0 1 0
+ * 2. Решить задачу о нахождении длины максимальной последовательности с помощью матрицы.
+ * 3. ***Требуется обойти конём шахматную доску размером NxM, пройдя через все поля доски по одному разу.
+ * Здесь алгоритм решения такой же как и в задаче о 8 ферзях. Разница только в проверке положения коня.
  */
 
-int fnBubbleSort(int aiArray[10])
+int fnFoundPaths(char caField[], char caVisitedFields[], int iaLengths[], int iLengthsIndex, int iStartX, int iStartY, int iFinishX, int iFinishY)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	caVisitedFields[iStartY*5+iStartX] = 1;
+
+	int iLengthsOldIndex = iLengthsIndex;
+	int bFinishFound = 0;
+
+	/*
+	printf("%d %d %d\n", iLengthsIndex, iStartX, iStartY);
+
+	for (int iIndexY=0; iIndexY<5; iIndexY++) {
+		for (int iIndexX=0; iIndexX<5; iIndexX++) {
+			printf("%d ", caVisitedFields[iIndexY*5+iIndexX]);
+		}
+		printf("\n");
 	}
-	printf("\n");
+	 */
 
-	int iOperations = 0;
-	int iSwapped = 0;
-	iOperations += 1;
-
-	do {
-		iSwapped = 0;
-		iOperations += 1;
-
-		for (int iIndex=0; iIndex<9; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex]>aiArray[iIndex+1]) {
-				int Temp = aiArray[iIndex+1];
-				aiArray[iIndex+1] = aiArray[iIndex];
-				aiArray[iIndex] = Temp;
-
-				iSwapped = 1;
-
-				iOperations += 6;
+	if (iStartX-1>-1) {
+		if (caVisitedFields[iStartY*5+iStartX-1] != 1 && caField[iStartY*5+iStartX-1] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
+			iLengthsIndex++;
+			if (iStartX-1==iFinishX && iStartY==iFinishY) {
+				bFinishFound = 1;
+			} else {
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX-1, iStartY, iFinishX, iFinishY);
 			}
 		}
-
-		iOperations += 1;
-	} while (iSwapped);
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
 	}
-	printf("\n");
-
-	return iOperations;
-}
-
-int fnOptimizedBubbleSort(int aiArray[10])
-{
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	int iOperations = 0;
-
-	int iLastSwap = 0;
-	int iCurrentSwap = 10;
-
-	do {
-		iLastSwap = 0;
-
-		for (int iIndex=1; iIndex<iCurrentSwap; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex-1]>aiArray[iIndex]) {
-				int Temp = aiArray[iIndex-1];
-				aiArray[iIndex-1] = aiArray[iIndex];
-				aiArray[iIndex] = Temp;
-				iOperations += 5;
-				iLastSwap = iIndex;
+	if (iStartX+1<5) {
+		if (caVisitedFields[iStartY*5+iStartX+1] != 1 && caField[iStartY*5+iStartX+1] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
+			iLengthsIndex++;
+			if (iStartX+1==iFinishX && iStartY==iFinishY) {
+				bFinishFound = 1;
+			} else {
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX+1, iStartY, iFinishX, iFinishY);
 			}
 		}
-
-		iOperations += 1;
-		iCurrentSwap = iLastSwap;
-
-		iOperations += 1;
-	} while(iCurrentSwap);
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
 	}
-	printf("\n");
-
-	return iOperations;
-}
-
-int fnOptimizedBubbleSort2(int aiArray[10])
-{
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	if (iStartY-1>-1) {
+		if (caVisitedFields[(iStartY-1)*5+iStartX] != 1 && caField[(iStartY-1)*5+iStartX] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
+			iLengthsIndex++;
+			if (iStartX==iFinishX && iStartY-1==iFinishY) {
+				bFinishFound = 1;
+			} else {
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY-1, iFinishX, iFinishY);
+			}
+		}
 	}
-	printf("\n");
-
-	int iOperations = 0;
-
-	for (int iIndex=0; iIndex<9; iIndex++) {
-		iOperations += 2;
-
-		iOperations += 1;
-		if (aiArray[iIndex]>aiArray[iIndex+1]) {
-			int iTempIndex = iIndex+1;
-			iOperations += 2;
-
-			do {
-				int Temp = aiArray[iTempIndex];
-				aiArray[iTempIndex] = aiArray[iTempIndex-1];
-				aiArray[iTempIndex-1] = Temp;
-				iTempIndex--;
-
-				iOperations += 9;
-			} while (iTempIndex>0 && aiArray[iTempIndex-1]>aiArray[iTempIndex]);
+	if (iStartY+1<5) {
+		if (caVisitedFields[(iStartY+1)*5+iStartX] != 1 && caField[(iStartY+1)*5+iStartX] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
+			iLengthsIndex++;
+			if (iStartX==iFinishX && iStartY+1==iFinishY) {
+				bFinishFound = 1;
+			} else {
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY+1, iFinishX, iFinishY);
+			}
 		}
 	}
 
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
+	caVisitedFields[iStartY*5+iStartX] = 0;
 
-	return iOperations;
+	//if (!bFinishFound) {
+	iaLengths[iLengthsOldIndex] = 0;
+	//}
+
+	return iLengthsIndex;
 }
 
 void fnTask1()
 {
-	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	int aiArray2[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	int aiArray3[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	char caField[] = {
+		1, 1, 1, 1, 1,
+		1, 0, 0, 0, 1,
+		1, 1, 1, 1, 1,
+		1, 0, 0, 0, 1,
+		1, 1, 1, 1, 1
+	};
 
-	printf("bubble sort operations: %d\n", fnBubbleSort(aiArray1));
-	printf("optimized bubble sort operations: %d\n", fnOptimizedBubbleSort(aiArray2));
-	printf("optimized bubble sort 2 operations: %d\n", fnOptimizedBubbleSort2(aiArray3));
+	char caVisitedFields[25] = {0};
+
+	int iStartX = 0;
+	int iStartY = 0;
+
+	int iFinishX = 4;
+	int iFinishY = 4;
+
+	int iaLengths[1000] = {0};
+	int iLengthsIndex = 0;
+
+	printf("Start position X: %d\n", iStartX);
+	printf("Start position Y: %d\n", iStartY);
+	printf("End position X: %d\n", iFinishX);
+	printf("End position Y: %d\n", iFinishY);
+
+	printf("Field: \n");
+	for (int iIndexY=0; iIndexY<5; iIndexY++) {
+		for (int iIndexX=0; iIndexX<5; iIndexX++) {
+			printf("%d ", caField[iIndexY*5+iIndexX]);
+		}
+		printf("\n");
+	}
+
+	fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY, iFinishX, iFinishY);
+
+	printf("\n");
+
+	int iCount = 0;
+
+	for (int iIndex=0; iIndex<1000; iIndex++) {
+		//printf("%d ", iaLengths[iIndex]);
+		if (iaLengths[iIndex]>0) {
+			iCount++;
+		}
+	}
+	printf("\n");
+
+	printf("Found paths: %d\n", iCount);
 }
 
-int fnShakerSort(int aiArray[10])
+char* maxLCS(char* caArray1, int iArray1Length, char* caArray2, int iArray2Length)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	int iaLengths[iArray1Length+1][iArray2Length+1];
+
+	for (int iIndexI=0; iIndexI<iArray1Length+1; iIndexI++) {
+		for (int iIndexJ=0; iIndexJ<iArray2Length+1; iIndexJ++) {
+			iaLengths[iIndexI][iIndexJ] = 0;
+		}
 	}
-	printf("\n");
 
-	int iOperations = 0;
-
-	iOperations += 2;
-	for (int iLeftIndex=0, iRightIndex=9; iLeftIndex<iRightIndex;) {
-		iOperations += 1;
-
-		for (int iIndex=iLeftIndex; iIndex<iRightIndex; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex+1]<aiArray[iIndex]) {
-				int Temp = aiArray[iIndex];
-				aiArray[iIndex] = aiArray[iIndex+1];
-				aiArray[iIndex+1] = Temp;
-
-				iOperations += 5;
+	for (int iIndexI=0; iIndexI<iArray1Length; iIndexI++) {
+		for (int iIndexJ=0; iIndexJ<iArray2Length; iIndexJ++) {
+			if (caArray1[iIndexI]==caArray2[iIndexJ]) {
+				iaLengths[iIndexI+1][iIndexJ+1] = iaLengths[iIndexI][iIndexJ] + 1;
+			} else {
+				iaLengths[iIndexI+1][iIndexJ+1] = iaLengths[iIndexI+1][iIndexJ] > iaLengths[iIndexI][iIndexJ+1] ? iaLengths[iIndexI+1][iIndexJ] : iaLengths[iIndexI][iIndexJ+1];
 			}
 		}
-		iOperations += 1;
-		iRightIndex--;
+	}
 
-		for (int iIndex=iRightIndex; iIndex>iLeftIndex; iIndex--) {
-			iOperations += 2;
+	int iCnt = iaLengths[iArray1Length][iArray2Length];
+	char* sResult = (char*) malloc(iCnt+1);
+	memset(sResult, 0, iCnt+1);
 
-			iOperations += 1;
-			if (aiArray[iIndex-1]>aiArray[iIndex]) {
-				int Temp = aiArray[iIndex];
-				aiArray[iIndex] = aiArray[iIndex-1];
-				aiArray[iIndex-1] = Temp;
-
-				iOperations += 5;
-			}
+	for (int iIndexI=iArray1Length-1, iIndexJ=iArray2Length-1; iIndexI >= 0 && iIndexJ>=0;) {
+		if (caArray1[iIndexI]==caArray2[iIndexJ]) {
+			--iCnt;
+			sResult[iCnt] = caArray1[iIndexI];
+			--iIndexI;
+			--iIndexJ;
+		} else if (iaLengths[iIndexI+1][iIndexJ] > iaLengths[iIndexI][iIndexJ+1]) {
+			--iIndexJ;
+		} else {
+			--iIndexI;
 		}
-		iOperations += 1;
-		iLeftIndex++;
 	}
 
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
+	return sResult;
 }
 
 void fnTask2()
 {
-	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-
-	printf("shaker sort operations: %d\n", fnShakerSort(aiArray1));
-}
-
-int fnBinarySearch(int aiArray[10], int iNumber)
-{
-	int iMiddleIndex = 10/2;
-	int iLeftIndex = 0, iRightIndex = 9;
-
-	do {
-		if (aiArray[iMiddleIndex]<iNumber) {
-			iLeftIndex = iMiddleIndex;
-			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
-		} else if (aiArray[iMiddleIndex]>iNumber) {
-			iRightIndex = iMiddleIndex;
-			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
-		}
-
-		if (aiArray[iMiddleIndex]==iNumber) {
-			return iMiddleIndex;
-		}
-	} while (iRightIndex-iLeftIndex>1);
-
-	return -1;
+	char* caArray1 = "GEEKBRAINS";
+	int iArray1Length = 10;
+	char* caArray2 = "GEEKMINDS";
+	int iArray2Length = 9;
+	printf("string 1: %s\n", caArray1);
+	printf("string 2: %s\n", caArray2);
+	printf("max LCS: %s\n", maxLCS(caArray1, iArray1Length, caArray2, iArray2Length));
 }
 
 void fnTask3()
 {
-	int aiArray1[10] = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
 
-	printf("binary search number 5 index: %d\n", fnBinarySearch(aiArray1, 5));
-	printf("binary search number 45 index: %d\n", fnBinarySearch(aiArray1, 45));
-	printf("binary search number 7 index: %d\n", fnBinarySearch(aiArray1, 7));
-	printf("binary search number 30 index: %d\n", fnBinarySearch(aiArray1, 30));
 }
-
-void fnTask4()
-{
-	//
-}
-
 
 int main(void) {
 
@@ -276,9 +221,6 @@ int main(void) {
 				break;
 			case 3:
 				fnTask3();
-				break;
-			case 4:
-				fnTask4();
 				break;
 			case 0:
 				printf("Bye-bye");
