@@ -27,73 +27,79 @@ int fnFoundPaths(char caField[], char caVisitedFields[], int iaLengths[], int iL
 
 	int iLengthsOldIndex = iLengthsIndex;
 	int bFinishFound = 0;
-	int bChildrenFinishFound = 0;
 
-	printf("%d %d %d\n", iLengthsIndex, iStartX, iStartY, iStartY*5+iStartX-1);
+	/*
+	printf("%d %d %d\n", iLengthsIndex, iStartX, iStartY);
 
-	if (iStartX-1>0) {
-		if (caVisitedFields[iStartY*5+iStartX-1] != 1) {
+	for (int iIndexY=0; iIndexY<5; iIndexY++) {
+		for (int iIndexX=0; iIndexX<5; iIndexX++) {
+			printf("%d ", caVisitedFields[iIndexY*5+iIndexX]);
+		}
+		printf("\n");
+	}
+	 */
+
+	if (iStartX-1>-1) {
+		if (caVisitedFields[iStartY*5+iStartX-1] != 1 && caField[iStartY*5+iStartX-1] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
 			iLengthsIndex++;
-			iaLengths[iLengthsIndex]++;
 			if (iStartX-1==iFinishX && iStartY==iFinishY) {
 				bFinishFound = 1;
 			} else {
-				bChildrenFinishFound = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX-1, iStartY, iFinishX, iFinishY);
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX-1, iStartY, iFinishX, iFinishY);
 			}
 		}
 	}
 	if (iStartX+1<5) {
-		if (caVisitedFields[iStartY*5+iStartX+1] != 1) {
+		if (caVisitedFields[iStartY*5+iStartX+1] != 1 && caField[iStartY*5+iStartX+1] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
 			iLengthsIndex++;
-			iaLengths[iLengthsIndex]++;
 			if (iStartX+1==iFinishX && iStartY==iFinishY) {
 				bFinishFound = 1;
 			} else {
-				bChildrenFinishFound = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX+1, iStartY, iFinishX, iFinishY);
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX+1, iStartY, iFinishX, iFinishY);
 			}
 		}
 	}
-	if (iStartY-1>0) {
-		if (caVisitedFields[(iStartY-1)*5+iStartX] != 1) {
+	if (iStartY-1>-1) {
+		if (caVisitedFields[(iStartY-1)*5+iStartX] != 1 && caField[(iStartY-1)*5+iStartX] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
 			iLengthsIndex++;
-			iaLengths[iLengthsIndex]++;
 			if (iStartX==iFinishX && iStartY-1==iFinishY) {
 				bFinishFound = 1;
 			} else {
-				bChildrenFinishFound = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY-1, iFinishX, iFinishY);
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY-1, iFinishX, iFinishY);
 			}
 		}
 	}
 	if (iStartY+1<5) {
-		if (caVisitedFields[(iStartY+1)*5+iStartX] != 1) {
+		if (caVisitedFields[(iStartY+1)*5+iStartX] != 1 && caField[(iStartY+1)*5+iStartX] != 0) {
+			iaLengths[iLengthsIndex+1] = iaLengths[iLengthsOldIndex]+1;
 			iLengthsIndex++;
-			iaLengths[iLengthsIndex]++;
 			if (iStartX==iFinishX && iStartY+1==iFinishY) {
 				bFinishFound = 1;
 			} else {
-				bChildrenFinishFound = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY+1, iFinishX, iFinishY);
+				iLengthsIndex = fnFoundPaths(caField, caVisitedFields, iaLengths, iLengthsIndex, iStartX, iStartY+1, iFinishX, iFinishY);
 			}
 		}
 	}
 
 	caVisitedFields[iStartY*5+iStartX] = 0;
 
-	if (bFinishFound) {
-		return bFinishFound;
-	}
-
+	//if (!bFinishFound) {
 	iaLengths[iLengthsOldIndex] = 0;
+	//}
 
-	return bChildrenFinishFound;
+	return iLengthsIndex;
 }
 
 void fnTask1()
 {
 	char caField[] = {
 		1, 1, 1, 1, 1,
-		1, 0, 1, 0, 1,
+		1, 0, 0, 0, 1,
 		1, 1, 1, 1, 1,
-		1, 0, 1, 0, 1,
+		1, 0, 0, 0, 1,
 		1, 1, 1, 1, 1
 	};
 
@@ -105,7 +111,7 @@ void fnTask1()
 	int iFinishX = 4;
 	int iFinishY = 4;
 
-	int iaLengths[100000] = {0};
+	int iaLengths[1000] = {0};
 	int iLengthsIndex = 0;
 
 	printf("Start position X: %d\n", iStartX);
@@ -114,8 +120,8 @@ void fnTask1()
 	printf("End position Y: %d\n", iFinishY);
 
 	printf("Field: \n");
-	for (int iIndexX=0; iIndexX<5; iIndexX++) {
-		for (int iIndexY=0; iIndexY<5; iIndexY++) {
+	for (int iIndexY=0; iIndexY<5; iIndexY++) {
+		for (int iIndexX=0; iIndexX<5; iIndexX++) {
 			printf("%d ", caField[iIndexY*5+iIndexX]);
 		}
 		printf("\n");
@@ -127,7 +133,7 @@ void fnTask1()
 
 	int iCount = 0;
 
-	for (int iIndex=0; iIndex<100000; iIndex++) {
+	for (int iIndex=0; iIndex<1000; iIndex++) {
 		//printf("%d ", iaLengths[iIndex]);
 		if (iaLengths[iIndex]>0) {
 			iCount++;
