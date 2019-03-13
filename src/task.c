@@ -30,12 +30,20 @@ typedef struct StackItem
 
 typedef struct
 {
+	int iSize;
 	StackItem* poLast;
 } Stack;
 
-void fnPushInt(Stack* poStack, int iValue)
+int fnPushInt(Stack* poStack, int iValue)
 {
 	StackItem* poCurrent = (StackItem*) malloc(sizeof(StackItem));
+	
+	if (!poCurrent) {
+		printf("Can't allocate memory. Stack size: %d\n", poStack->iSize);
+		return 1;
+	}
+	
+	poStack->iSize++;
 	poCurrent->poPrevious = 0;
 	poCurrent->iValue = iValue;
 	
@@ -44,6 +52,8 @@ void fnPushInt(Stack* poStack, int iValue)
 		poStack->poLast = poCurrent;
 	}
 	poStack->poLast = poCurrent;
+	
+	return 0;
 }
 
 int fnPop(Stack* poStack)
@@ -51,6 +61,7 @@ int fnPop(Stack* poStack)
 	int iResult = 0;
 	
 	if (poStack->poLast) {
+		poStack->iSize--;
 		StackItem* poPrevious = poStack->poLast->poPrevious;
 		iResult = poStack->poLast->iValue;
 		free(poStack->poLast);
@@ -74,6 +85,7 @@ void fnTask1()
 {
 	Stack* poStack = (Stack*) malloc(sizeof(Stack));
 	poStack->poLast = 0;
+	poStack->iSize = 0;
 	
 	int iNumber = 0;
 	
@@ -97,12 +109,122 @@ void fnTask1()
 
 void fnTask2()
 {
+	Stack* poStack = (Stack*) malloc(sizeof(Stack));
+	poStack->poLast = 0;
+	poStack->iSize = 0;
+	
+	while(!fnPushInt(poStack, 1)) {
+		//
+	}
+	
+	fnClear(poStack);
+	free(poStack);
+}
 
+typedef struct BracketStackItem 
+{
+	struct BracketStackItem* poPrevious;
+	char cValue;
+} BracketStackItem;
+
+typedef struct
+{
+	int iSize;
+	BracketStackItem* poLast;
+} BracketStack;
+
+int fnPushBracket(BracketStack* poStack, char cValue)
+{
+	BracketStackItem* poCurrent = (BracketStackItem*) malloc(sizeof(BracketStackItem));
+	
+	if (!poCurrent) {
+		printf("Can't allocate memory. Stack size: %d\n", poStack->iSize);
+		return 1;
+	}
+	
+	poStack->iSize++;
+	poCurrent->poPrevious = 0;
+	poCurrent->cValue = cValue;
+	
+	if (poStack->poLast) {
+		poCurrent->poPrevious = poStack->poLast;
+		poStack->poLast = poCurrent;
+	}
+	poStack->poLast = poCurrent;
+	
+	return 0;
+}
+
+void fnPopBracket(BracketStack* poStack)
+{
+	if (poStack->poLast) {
+		poStack->iSize--;
+		BracketStackItem* poPrevious = poStack->poLast->poPrevious;
+		free(poStack->poLast);
+		poStack->poLast = poPrevious;
+	}
+}
+
+void fnClearBrackets(BracketStack* poStack)
+{
+	BracketStackItem* poCurrentItem = poStack->poLast;
+	
+	while (poCurrentItem) {
+		poCurrentItem = poCurrentItem->poPrevious;
+		free(poCurrentItem);
+	}
 }
 
 void fnTask3()
 {
-
+	BracketStack* poBracketStack = (BracketStack*) malloc(sizeof(BracketStack));
+	poBracketStack->poLast = 0;
+	poBracketStack->iSize = 0;
+	
+	char sExpression[100] = "\0";
+	
+	printf("Enter expression:\n");
+	
+	scanf("%s", sExpression);
+	
+	int iIndex = 0;
+	int bResult = 1;
+	
+	char caBrackets[] = {'(', ')', '[', ']', '{', '}'};
+	
+	while (sExpression[iIndex]) {
+		if (sExpression[iIndex]=='(' || sExpression[iIndex]=='{' || sExpression[iIndex]=='[') {
+			fnPushBracket(poBracketStack, sExpression[iIndex]);
+		}
+		
+		int iBracketIndex=0;
+		
+		for (iBracketIndex=0; iBracketIndex<6; iBracketIndex+=2) {
+			if (sExpression[iIndex]==caBrackets[iBracketIndex+1]) {
+				if (!poBracketStack->poLast) {
+					bResult = 0;
+					goto END;
+				}
+				if (poBracketStack->poLast->cValue!=caBrackets[iBracketIndex]) {
+					bResult = 0;
+					goto END;
+				}
+				fnPopBracket(poBracketStack);
+				break;
+			}
+		}
+		iIndex++;
+	}
+	END:
+	
+	if (bResult) {
+		printf("The sequence is correct\n");
+	} else {
+		printf("The sequence is not correct\n");
+	}
+	
+	fnClearBrackets(poBracketStack);
+	free(poBracketStack);
 }
 
 void fnTask4()
@@ -152,7 +274,7 @@ int main(void) {
 				fnTask6();
 				break;
 			case 0:
-				printf("Bye-bye");
+				printf("Bye-bye\n");
 				break;
 			default:
 				printf("Wrong selected\n");
