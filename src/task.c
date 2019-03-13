@@ -46,9 +46,18 @@ void fnPushInt(Stack* poStack, int iValue)
 	poStack->poLast = poCurrent;
 }
 
-void fnPop(Stack* poStack)
+int fnPop(Stack* poStack)
 {
+	int iResult = 0;
 	
+	if (poStack->poLast) {
+		StackItem* poPrevious = poStack->poLast->poPrevious;
+		iResult = poStack->poLast->iValue;
+		free(poStack->poLast);
+		poStack->poLast = poPrevious;
+	}
+	
+	return iResult;
 }
 
 void fnClear(Stack* poStack)
@@ -70,16 +79,16 @@ void fnTask1()
 	
 	printf("Enter number:\n");
 	scanf("%d", &iNumber);
-	
-	fnPushInt(poStack, 1);
+
+	while (iNumber>0) {	
+		fnPushInt(poStack, iNumber % 2);
+		iNumber = iNumber / 2;
+	}
 	
 	printf("Result: ");
 	
-	StackItem* poCurrentItem = poStack->poLast;
-	
-	while (poCurrentItem) {
-		printf("%d", poCurrentItem->iValue);
-		poCurrentItem = poCurrentItem->poPrevious;
+	while (poStack->poLast) {
+		printf("%d", fnPop(poStack));
 	}
 	
 	fnClear(poStack);
