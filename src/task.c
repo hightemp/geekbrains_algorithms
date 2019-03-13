@@ -76,8 +76,9 @@ void fnClear(Stack* poStack)
 	StackItem* poCurrentItem = poStack->poLast;
 	
 	while (poCurrentItem) {
-		poCurrentItem = poCurrentItem->poPrevious;
+		StackItem* poPrevious = poCurrentItem->poPrevious;
 		free(poCurrentItem);
+		poCurrentItem = poPrevious;
 	}
 }
 
@@ -148,7 +149,6 @@ int fnPushBracket(BracketStack* poStack, char cValue)
 	
 	if (poStack->poLast) {
 		poCurrent->poPrevious = poStack->poLast;
-		poStack->poLast = poCurrent;
 	}
 	poStack->poLast = poCurrent;
 	
@@ -170,8 +170,9 @@ void fnClearBrackets(BracketStack* poStack)
 	BracketStackItem* poCurrentItem = poStack->poLast;
 	
 	while (poCurrentItem) {
-		poCurrentItem = poCurrentItem->poPrevious;
+		BracketStackItem* poPrevious = poCurrentItem->poPrevious;
 		free(poCurrentItem);
+		poCurrentItem = poPrevious;
 	}
 }
 
@@ -227,9 +228,142 @@ void fnTask3()
 	free(poBracketStack);
 }
 
+typedef struct ListItem
+{
+	int iValue;
+	struct ListItem *poNext;
+} ListItem;
+
+typedef struct List
+{
+	int iSize;
+	ListItem* poFirst;
+	ListItem* poLast;
+} List;
+
+void fnListInsert(List* poList, int iValue, int iPosition)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	int iCurrentPosition = iPosition;
+	
+	do {
+		if (!iCurrentPosition) {
+			ListItem* poListItem = (ListItem*) malloc(sizeof(ListItem));
+			
+			if (!poListItem) {
+				printf("Can't allocate memory. Stack size: %d\n", poList->iSize);
+				return;
+			}
+			
+			poListItem->iValue = iValue;
+			if (poCurrentItem) {
+				poListItem->poNext = poCurrentItem;
+			} else {
+				poListItem->poNext = 0;
+			}
+			poList->iSize++;
+
+			if (!poList->poFirst) {
+				poList->poFirst = poListItem;
+			} else {
+				if (!iPosition) {
+					poList->poFirst = poListItem;
+				}
+			}
+			return;
+		}
+		if (poCurrentItem) {
+			poCurrentItem = poCurrentItem->poNext;
+			iCurrentPosition--;
+		}
+	} while(poCurrentItem);
+}
+
+void fnListPush(List* poList, int iValue)
+{
+	ListItem* poCurrent = (ListItem*) malloc(sizeof(ListItem));
+	
+	if (!poCurrent) {
+		printf("Can't allocate memory. Stack size: %d\n", poList->iSize);
+		return;
+	}
+	
+	poList->iSize++;
+	poCurrent->poNext = 0;
+	poCurrent->iValue = iValue;
+	
+	if (poList->poLast) {
+		poList->poLast->poNext = poCurrent;
+		poList->poLast = poCurrent;
+	}
+	
+	poList->poLast = poCurrent;
+	
+	if (!poList->poFirst) {
+		poList->poFirst = poCurrent;
+	}
+}
+
+void fnListCopy(List* poList, List* poList2)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	
+	while (poCurrentItem) {
+		fnListPush(poList2, poCurrentItem->iValue);
+		poCurrentItem = poCurrentItem->poNext;
+	}
+}
+
+void fnListPrint(List* poList)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	
+	while (poCurrentItem) {
+		printf("%d ", poCurrentItem->iValue);
+		poCurrentItem = poCurrentItem->poNext;
+	}
+}
+
+void fnListClear(List* poList)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	
+	while (poCurrentItem) {
+		ListItem* poNext = poCurrentItem->poNext;
+		free(poNext);
+		poCurrentItem = poNext;
+	}
+}
+
 void fnTask4()
 {
+	List* poList = (List*) malloc(sizeof(List));
+	poList->poFirst = 0;
+	poList->iSize = 0;
 
+	int iIndex = 0;
+	
+	for (;iIndex<10;iIndex++) {
+		fnListPush(poList, iIndex);
+	}
+
+	List* poList2 = (List*) malloc(sizeof(List));
+	poList2->poFirst = 0;
+	poList2->iSize = 0;
+
+	fnListCopy(poList, poList2);
+	
+	printf("List 1: ");
+	fnListPrint(poList);
+	printf("\n");
+	printf("List 2: ");
+	fnListPrint(poList2);
+	printf("\n");
+	
+	fnListClear(poList2);
+	fnListClear(poList);
+	free(poList2);
+	free(poList);
 }
 
 void fnTask5()
