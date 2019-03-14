@@ -10,250 +10,371 @@
 #include <math.h>
 
 /**
- * 1. 1. Попробовать оптимизировать пузырьковую сортировку.
- * Сравнить количество операций сравнения оптимизированной и не оптимизированной программы.
- * Написать функции сортировки, которые возвращают количество операций.
- * 2. *Реализовать шейкерную сортировку.
- * 3. Реализовать бинарный алгоритм поиска в виде функции,
- * которой передается отсортированный массив.
- * Функция возвращает индекс найденного элемента или -1, если элемент не найден.
- * 4. *Подсчитать количество операций для каждой из сортировок и сравнить его с асимптотической сложностью алгоритма.
- */
+ * 1. Реализовать перевод из 10 в 2 систему счисления с использованием стека.
+ * 2. Добавить в программу “реализация стека на основе односвязного списка” проверку на выделение памяти. 
+ * Если память не выделяется, то выводится соответствующее сообщение. 
+ * Постарайтесь создать ситуацию, когда память не будет выделяться (добавлением большого количества данных).
+ * 3. Написать программу, которая определяет, является ли введенная скобочная последовательность правильной. 
+ * Примеры правильных скобочных выражений: (), ([])(), {}(), ([{}]), неправильных — )(, ())({), (, ])}), ([(]) для скобок [,(,{.
+ * Например: (2+(2*2)) или [2/{5*(4+7)}]
+ * 4. *Создать функцию, копирующую односвязный список (то есть создает в памяти копию односвязного списка, без удаления первого списка)
+ * 5. **Реализовать алгоритм перевода из инфиксной записи арифметического выражения в постфиксную.
+ * 6. *Реализовать очередь.
+ */ 
 
-int fnBubbleSort(int aiArray[10])
+typedef struct StackItem 
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	struct StackItem* poPrevious;
+	int iValue;
+} StackItem;
+
+typedef struct
+{
+	int iSize;
+	StackItem* poLast;
+} Stack;
+
+int fnPushInt(Stack* poStack, int iValue)
+{
+	StackItem* poCurrent = (StackItem*) malloc(sizeof(StackItem));
+	
+	if (!poCurrent) {
+		printf("Can't allocate memory. Stack size: %d\n", poStack->iSize);
+		return 1;
 	}
-	printf("\n");
-
-	int iOperations = 0;
-	int iSwapped = 0;
-	iOperations += 1;
-
-	do {
-		iSwapped = 0;
-		iOperations += 1;
-
-		for (int iIndex=0; iIndex<9; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex]>aiArray[iIndex+1]) {
-				int Temp = aiArray[iIndex+1];
-				aiArray[iIndex+1] = aiArray[iIndex];
-				aiArray[iIndex] = Temp;
-
-				iSwapped = 1;
-
-				iOperations += 6;
-			}
-		}
-
-		iOperations += 1;
-	} while (iSwapped);
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	
+	poStack->iSize++;
+	poCurrent->poPrevious = 0;
+	poCurrent->iValue = iValue;
+	
+	if (poStack->poLast) {
+		poCurrent->poPrevious = poStack->poLast;
+		poStack->poLast = poCurrent;
 	}
-	printf("\n");
-
-	return iOperations;
+	poStack->poLast = poCurrent;
+	
+	return 0;
 }
 
-int fnOptimizedBubbleSort(int aiArray[10])
+int fnPop(Stack* poStack)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	int iResult = 0;
+	
+	if (poStack->poLast) {
+		poStack->iSize--;
+		StackItem* poPrevious = poStack->poLast->poPrevious;
+		iResult = poStack->poLast->iValue;
+		free(poStack->poLast);
+		poStack->poLast = poPrevious;
 	}
-	printf("\n");
-
-	int iOperations = 0;
-
-	int iLastSwap = 0;
-	int iCurrentSwap = 10;
-
-	do {
-		iLastSwap = 0;
-
-		for (int iIndex=1; iIndex<iCurrentSwap; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex-1]>aiArray[iIndex]) {
-				int Temp = aiArray[iIndex-1];
-				aiArray[iIndex-1] = aiArray[iIndex];
-				aiArray[iIndex] = Temp;
-				iOperations += 5;
-				iLastSwap = iIndex;
-			}
-		}
-
-		iOperations += 1;
-		iCurrentSwap = iLastSwap;
-
-		iOperations += 1;
-	} while(iCurrentSwap);
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
+	
+	return iResult;
 }
 
-int fnOptimizedBubbleSort2(int aiArray[10])
+void fnClear(Stack* poStack)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	StackItem* poCurrentItem = poStack->poLast;
+	
+	while (poCurrentItem) {
+		StackItem* poPrevious = poCurrentItem->poPrevious;
+		free(poCurrentItem);
+		poCurrentItem = poPrevious;
 	}
-	printf("\n");
-
-	int iOperations = 0;
-
-	for (int iIndex=0; iIndex<9; iIndex++) {
-		iOperations += 2;
-
-		iOperations += 1;
-		if (aiArray[iIndex]>aiArray[iIndex+1]) {
-			int iTempIndex = iIndex+1;
-			iOperations += 2;
-
-			do {
-				int Temp = aiArray[iTempIndex];
-				aiArray[iTempIndex] = aiArray[iTempIndex-1];
-				aiArray[iTempIndex-1] = Temp;
-				iTempIndex--;
-
-				iOperations += 9;
-			} while (iTempIndex>0 && aiArray[iTempIndex-1]>aiArray[iTempIndex]);
-		}
-	}
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
 }
 
 void fnTask1()
 {
-	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	int aiArray2[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	int aiArray3[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	Stack* poStack = (Stack*) malloc(sizeof(Stack));
+	poStack->poLast = 0;
+	poStack->iSize = 0;
+	
+	int iNumber = 0;
+	
+	printf("Enter number:\n");
+	scanf("%d", &iNumber);
 
-	printf("bubble sort operations: %d\n", fnBubbleSort(aiArray1));
-	printf("optimized bubble sort operations: %d\n", fnOptimizedBubbleSort(aiArray2));
-	printf("optimized bubble sort 2 operations: %d\n", fnOptimizedBubbleSort2(aiArray3));
-}
-
-int fnShakerSort(int aiArray[10])
-{
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	while (iNumber>0) {	
+		fnPushInt(poStack, iNumber % 2);
+		iNumber = iNumber / 2;
 	}
-	printf("\n");
-
-	int iOperations = 0;
-
-	iOperations += 2;
-	for (int iLeftIndex=0, iRightIndex=9; iLeftIndex<iRightIndex;) {
-		iOperations += 1;
-
-		for (int iIndex=iLeftIndex; iIndex<iRightIndex; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex+1]<aiArray[iIndex]) {
-				int Temp = aiArray[iIndex];
-				aiArray[iIndex] = aiArray[iIndex+1];
-				aiArray[iIndex+1] = Temp;
-
-				iOperations += 5;
-			}
-		}
-		iOperations += 1;
-		iRightIndex--;
-
-		for (int iIndex=iRightIndex; iIndex>iLeftIndex; iIndex--) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex-1]>aiArray[iIndex]) {
-				int Temp = aiArray[iIndex];
-				aiArray[iIndex] = aiArray[iIndex-1];
-				aiArray[iIndex-1] = Temp;
-
-				iOperations += 5;
-			}
-		}
-		iOperations += 1;
-		iLeftIndex++;
+	
+	printf("Result: ");
+	
+	while (poStack->poLast) {
+		printf("%d", fnPop(poStack));
 	}
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
+	
+	fnClear(poStack);
+	free(poStack);
 }
 
 void fnTask2()
 {
-	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-
-	printf("shaker sort operations: %d\n", fnShakerSort(aiArray1));
+	Stack* poStack = (Stack*) malloc(sizeof(Stack));
+	poStack->poLast = 0;
+	poStack->iSize = 0;
+	
+	while(!fnPushInt(poStack, 1)) {
+		//
+	}
+	
+	fnClear(poStack);
+	free(poStack);
 }
 
-int fnBinarySearch(int aiArray[10], int iNumber)
+typedef struct BracketStackItem 
 {
-	int iMiddleIndex = 10/2;
-	int iLeftIndex = 0, iRightIndex = 9;
+	struct BracketStackItem* poPrevious;
+	char cValue;
+} BracketStackItem;
 
-	do {
-		if (aiArray[iMiddleIndex]<iNumber) {
-			iLeftIndex = iMiddleIndex;
-			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
-		} else if (aiArray[iMiddleIndex]>iNumber) {
-			iRightIndex = iMiddleIndex;
-			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
-		}
+typedef struct
+{
+	int iSize;
+	BracketStackItem* poLast;
+} BracketStack;
 
-		if (aiArray[iMiddleIndex]==iNumber) {
-			return iMiddleIndex;
-		}
-	} while (iRightIndex-iLeftIndex>1);
+int fnPushBracket(BracketStack* poStack, char cValue)
+{
+	BracketStackItem* poCurrent = (BracketStackItem*) malloc(sizeof(BracketStackItem));
+	
+	if (!poCurrent) {
+		printf("Can't allocate memory. Stack size: %d\n", poStack->iSize);
+		return 1;
+	}
+	
+	poStack->iSize++;
+	poCurrent->poPrevious = 0;
+	poCurrent->cValue = cValue;
+	
+	if (poStack->poLast) {
+		poCurrent->poPrevious = poStack->poLast;
+	}
+	poStack->poLast = poCurrent;
+	
+	return 0;
+}
 
-	return -1;
+void fnPopBracket(BracketStack* poStack)
+{
+	if (poStack->poLast) {
+		poStack->iSize--;
+		BracketStackItem* poPrevious = poStack->poLast->poPrevious;
+		free(poStack->poLast);
+		poStack->poLast = poPrevious;
+	}
+}
+
+void fnClearBrackets(BracketStack* poStack)
+{
+	BracketStackItem* poCurrentItem = poStack->poLast;
+	
+	while (poCurrentItem) {
+		BracketStackItem* poPrevious = poCurrentItem->poPrevious;
+		free(poCurrentItem);
+		poCurrentItem = poPrevious;
+	}
 }
 
 void fnTask3()
 {
-	int aiArray1[10] = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+	BracketStack* poBracketStack = (BracketStack*) malloc(sizeof(BracketStack));
+	poBracketStack->poLast = 0;
+	poBracketStack->iSize = 0;
+	
+	char sExpression[100] = "\0";
+	
+	printf("Enter expression:\n");
+	
+	scanf("%s", sExpression);
+	
+	int iIndex = 0;
+	int bResult = 1;
+	
+	char caBrackets[] = {'(', ')', '[', ']', '{', '}'};
+	
+	while (sExpression[iIndex]) {
+		if (sExpression[iIndex]=='(' || sExpression[iIndex]=='{' || sExpression[iIndex]=='[') {
+			fnPushBracket(poBracketStack, sExpression[iIndex]);
+		}
+		
+		int iBracketIndex=0;
+		
+		for (iBracketIndex=0; iBracketIndex<6; iBracketIndex+=2) {
+			if (sExpression[iIndex]==caBrackets[iBracketIndex+1]) {
+				if (!poBracketStack->poLast) {
+					bResult = 0;
+					goto END;
+				}
+				if (poBracketStack->poLast->cValue!=caBrackets[iBracketIndex]) {
+					bResult = 0;
+					goto END;
+				}
+				fnPopBracket(poBracketStack);
+				break;
+			}
+		}
+		iIndex++;
+	}
+	END:
+	
+	if (bResult) {
+		printf("The sequence is correct\n");
+	} else {
+		printf("The sequence is not correct\n");
+	}
+	
+	fnClearBrackets(poBracketStack);
+	free(poBracketStack);
+}
 
-	printf("binary search number 5 index: %d\n", fnBinarySearch(aiArray1, 5));
-	printf("binary search number 45 index: %d\n", fnBinarySearch(aiArray1, 45));
-	printf("binary search number 7 index: %d\n", fnBinarySearch(aiArray1, 7));
-	printf("binary search number 30 index: %d\n", fnBinarySearch(aiArray1, 30));
+typedef struct ListItem
+{
+	int iValue;
+	struct ListItem *poNext;
+} ListItem;
+
+typedef struct List
+{
+	int iSize;
+	ListItem* poFirst;
+	ListItem* poLast;
+} List;
+
+void fnListInsert(List* poList, int iValue, int iPosition)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	int iCurrentPosition = iPosition;
+	
+	do {
+		if (!iCurrentPosition) {
+			ListItem* poListItem = (ListItem*) malloc(sizeof(ListItem));
+			
+			if (!poListItem) {
+				printf("Can't allocate memory. Stack size: %d\n", poList->iSize);
+				return;
+			}
+			
+			poListItem->iValue = iValue;
+			if (poCurrentItem) {
+				poListItem->poNext = poCurrentItem;
+			} else {
+				poListItem->poNext = 0;
+			}
+			poList->iSize++;
+
+			if (!poList->poFirst) {
+				poList->poFirst = poListItem;
+			} else {
+				if (!iPosition) {
+					poList->poFirst = poListItem;
+				}
+			}
+			return;
+		}
+		if (poCurrentItem) {
+			poCurrentItem = poCurrentItem->poNext;
+			iCurrentPosition--;
+		}
+	} while(poCurrentItem);
+}
+
+void fnListPush(List* poList, int iValue)
+{
+	ListItem* poCurrent = (ListItem*) malloc(sizeof(ListItem));
+	
+	if (!poCurrent) {
+		printf("Can't allocate memory. Stack size: %d\n", poList->iSize);
+		return;
+	}
+	
+	poList->iSize++;
+	poCurrent->poNext = 0;
+	poCurrent->iValue = iValue;
+	
+	if (poList->poLast) {
+		poList->poLast->poNext = poCurrent;
+		poList->poLast = poCurrent;
+	}
+	
+	poList->poLast = poCurrent;
+	
+	if (!poList->poFirst) {
+		poList->poFirst = poCurrent;
+	}
+}
+
+void fnListCopy(List* poList, List* poList2)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	
+	while (poCurrentItem) {
+		fnListPush(poList2, poCurrentItem->iValue);
+		poCurrentItem = poCurrentItem->poNext;
+	}
+}
+
+void fnListPrint(List* poList)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	
+	while (poCurrentItem) {
+		printf("%d ", poCurrentItem->iValue);
+		poCurrentItem = poCurrentItem->poNext;
+	}
+}
+
+void fnListClear(List* poList)
+{
+	ListItem* poCurrentItem = poList->poFirst;
+	
+	while (poCurrentItem) {
+		ListItem* poNext = poCurrentItem->poNext;
+		free(poNext);
+		poCurrentItem = poNext;
+	}
 }
 
 void fnTask4()
 {
-	//
+	List* poList = (List*) malloc(sizeof(List));
+	poList->poFirst = 0;
+	poList->iSize = 0;
+
+	int iIndex = 0;
+	
+	for (;iIndex<10;iIndex++) {
+		fnListPush(poList, iIndex);
+	}
+
+	List* poList2 = (List*) malloc(sizeof(List));
+	poList2->poFirst = 0;
+	poList2->iSize = 0;
+
+	fnListCopy(poList, poList2);
+	
+	printf("List 1: ");
+	fnListPrint(poList);
+	printf("\n");
+	printf("List 2: ");
+	fnListPrint(poList2);
+	printf("\n");
+	
+	fnListClear(poList2);
+	fnListClear(poList);
+	free(poList2);
+	free(poList);
 }
 
+void fnTask5()
+{
+
+}
+
+void fnTask6()
+{
+
+}
 
 int main(void) {
 
@@ -280,8 +401,14 @@ int main(void) {
 			case 4:
 				fnTask4();
 				break;
+			case 5:
+				fnTask5();
+				break;
+			case 6:
+				fnTask6();
+				break;
 			case 0:
-				printf("Bye-bye");
+				printf("Bye-bye\n");
 				break;
 			default:
 				printf("Wrong selected\n");
