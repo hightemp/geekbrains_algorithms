@@ -97,7 +97,7 @@ void fnBinaryTreeAddNode(BinaryTree *poTree, int iValue)
 		return;
 	}
 
-	fnTreeNodeAddChild(poTree, iValue);
+	fnTreeNodeAddChild(poTree->poRoot, iValue);
 }
 
 void fnBinaryTreeInit(BinaryTree *poTree, int iValue)
@@ -109,6 +109,8 @@ void fnBinaryTreeInit(BinaryTree *poTree, int iValue)
 	poNewTreeNode->poRight = 0;
 
 	poTree->poRoot = poNewTreeNode;
+
+	//printf("Set root node %d\n", poTree->poRoot->iValue);
 }
 
 void fnTreeNodeAddChild(TreeNode *poTreeNode, int iValue)
@@ -122,25 +124,26 @@ void fnTreeNodeAddChild(TreeNode *poTreeNode, int iValue)
 	}
 
 	if (iValue < poTreeNode->iValue && !poTreeNode->poLeft) {
+		//printf("Add left node to %d\n", poTreeNode->iValue);
 		TreeNode *poNewTreeNode = (TreeNode *) malloc(sizeof(TreeNode));
 		poNewTreeNode->poParent = poTreeNode;
 		poNewTreeNode->iValue = iValue;
 		poNewTreeNode->poLeft = 0;
 		poNewTreeNode->poRight = 0;
 		poTreeNode->poLeft = poNewTreeNode;
-	}
-	if (iValue < poTreeNode->iValue && poTreeNode->poLeft) {
+	} else if (iValue < poTreeNode->iValue && poTreeNode->poLeft) {
+		//printf("Step into left node of %d\n", poTreeNode->iValue);
 		fnTreeNodeAddChild(poTreeNode->poLeft, iValue);
-	}
-	if (poTreeNode->iValue < iValue && !poTreeNode->poRight) {
+	} else if (poTreeNode->iValue < iValue && !poTreeNode->poRight) {
+		//printf("Add right node to %d\n", poTreeNode->iValue);
 		TreeNode *poNewTreeNode = (TreeNode *) malloc(sizeof(TreeNode));
 		poNewTreeNode->poParent = poTreeNode;
 		poNewTreeNode->iValue = iValue;
 		poNewTreeNode->poLeft = 0;
 		poNewTreeNode->poRight = 0;
 		poTreeNode->poRight = poNewTreeNode;
-	}
-	if (poTreeNode->iValue < iValue && poTreeNode->poRight) {
+	} else if (poTreeNode->iValue < iValue && poTreeNode->poRight) {
+		//printf("Step into right node of %d\n", poTreeNode->iValue);
 		fnTreeNodeAddChild(poTreeNode->poRight, iValue);
 	}
 }
@@ -150,11 +153,13 @@ void fnTreeNodeClear(TreeNode *poTreeNode)
 	if (poTreeNode->poLeft) {
 		fnTreeNodeClear(poTreeNode->poLeft);
 		free(poTreeNode->poLeft);
+		poTreeNode->poLeft = 0;
 	}
 
 	if (poTreeNode->poRight) {
 		fnTreeNodeClear(poTreeNode->poRight);
 		free(poTreeNode->poRight);
+		poTreeNode->poRight = 0;
 	}
 }
 
@@ -166,6 +171,7 @@ void fnBinaryTreeClear(BinaryTree *poTree)
 
 	fnTreeNodeClear(poTree->poRoot);
 	free(poTree->poRoot);
+	poTree->poRoot = 0;
 }
 
 void fnBinaryTreePrint(BinaryTree *poTree)
@@ -184,14 +190,14 @@ void fnTreeNodePrint(TreeNode *poTreeNode, int iLevel)
 	fnPrintSpaces(iLevel);
 	printf("Value: %d\n", poTreeNode->iValue);
 
-	fnPrintSpaces(iLevel);
 	if (poTreeNode->poLeft) {
+		fnPrintSpaces(iLevel);
 		printf("Left:\n");
 		fnTreeNodePrint(poTreeNode->poLeft, iLevel+1);
 	}
 
-	fnPrintSpaces(iLevel);
 	if (poTreeNode->poRight) {
+		fnPrintSpaces(iLevel);
 		printf("Right:\n");
 		fnTreeNodePrint(poTreeNode->poRight, iLevel+1);
 	}
@@ -264,9 +270,13 @@ void fnBinaryTreeReadFromFile(BinaryTree *poTree, char *pcString)
 		return;
 	}
 
-	fnBinaryTreeClear(poTree);
-
 	FILE *poFileHandler = fopen(pcString, "r");
+
+	if (!poFileHandler) {
+		printf("Can't open file\n");
+	}
+
+	fnBinaryTreeClear(poTree);
 
 	int iNodesCount = 0;
 
@@ -296,7 +306,13 @@ void fnBinaryTreeWriteToFile(BinaryTree *poTree, char *pcString)
 		return;
 	}
 
+	printf("Saving to file: %s\n", pcString);
+
 	FILE *poFileHandler = fopen(pcString, "w");
+
+	if (!poFileHandler) {
+		printf("Can't open file\n");
+	}
 
 	fprintf(poFileHandler, "%d ", fnBinaryTreeCountNodes(poTree));
 
@@ -333,6 +349,7 @@ void fnTask2()
 
 	do
 	{
+		printf("\n");
 		printf("0 - return to main menu\n");
 		printf("1 - print tree\n");
 		printf("2 - search element\n");
