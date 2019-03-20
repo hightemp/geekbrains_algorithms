@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /**
  * 1. Написать функции, которые считывают матрицу смежности из файла и выводят ее на экран
@@ -94,16 +95,16 @@ void fnPrintSpaces(int iCount)
 	}
 }
 
-void fnDFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex, int* iVisitedVertexes, int iDepthLevel)
+void fnDFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex, int* piVisitedVertexes, int iDepthLevel)
 {
-	int bFirstRun = !iVisitedVertexes;
+	int bFirstRun = !piVisitedVertexes;
 	
 	if (bFirstRun) {
-		iVisitedVertexes = (int*) malloc(sizeof(int)*poAdjacencyMatrix->iSize);
-		memset(iVisitedVertexes, 0, sizeof(int)*poAdjacencyMatrix->iSize);
+		piVisitedVertexes = (int*) malloc(sizeof(int)*poAdjacencyMatrix->iSize);
+		memset(piVisitedVertexes, 0, sizeof(int)*poAdjacencyMatrix->iSize);
 	}
 	
-	iVisitedVertexes[iStartVertexIndex] = 1;
+	piVisitedVertexes[iStartVertexIndex] = 1;
 	
 	fnPrintSpaces(iDepthLevel);
 	printf("Vertex %d\n", iStartVertexIndex);
@@ -117,13 +118,13 @@ void fnDFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex, int* iVisi
 		
 		int iIndex = iY*poAdjacencyMatrix->iSize+iStartVertexIndex;
 		
-		if (poAdjacencyMatrix->piArray[iIndex] && !iVisitedVertexes[iY]) {
-			fnDFS(poAdjacencyMatrix, iY, iVisitedVertexes, iDepthLevel+1);
+		if (poAdjacencyMatrix->piArray[iIndex] && !piVisitedVertexes[iY]) {
+			fnDFS(poAdjacencyMatrix, iY, piVisitedVertexes, iDepthLevel+1);
 		}
 	}
 	
 	if (bFirstRun) {
-		free(iVisitedVertexes);
+		free(piVisitedVertexes);
 	}
 }
 
@@ -146,9 +147,57 @@ void fnTask2()
 	printf("\n");
 }
 
-void fnBFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex, int* iVisitedVertexes, int iDepthLevel)
+void fnBFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex)
 {
+	int iArraySize = sizeof(int)*poAdjacencyMatrix->iSize;
+	int iDepthLevel = 0;
 	
+	int* piVisitedVertexes = (int*) malloc(iArraySize);
+	memset((void*) piVisitedVertexes, 0, iArraySize);
+	
+	int* piVertexesStack = (int*) malloc(iArraySize);
+	memset(piVertexesStack, 0, iArraySize);
+
+	int* piChildrenVertexesStack = (int*) malloc(iArraySize);
+	memset(piChildrenVertexesStack, 0, iArraySize);
+	
+	int iY = 0;
+	int iStackLength = 1;
+	int iChildrenStackLength = 0;
+	piVertexesStack[0] = iStartVertexIndex;
+	piVisitedVertexes[iStartVertexIndex] = 1;
+
+	do {
+		int iCurrentVertexIndex = piVertexesStack[iStackLength-1];
+		fnPrintSpaces(iDepthLevel);
+		printf("Vertex %d\n", iCurrentVertexIndex);
+		iStackLength--;
+		
+		for (iY = 0; iY<poAdjacencyMatrix->iSize; iY++) {
+			if (iY==iStartVertexIndex) {
+				continue;
+			}
+			
+			int iIndex = iY*poAdjacencyMatrix->iSize+iCurrentVertexIndex;
+			
+			if (poAdjacencyMatrix->piArray[iIndex] && !piVisitedVertexes[iY]) {
+				piChildrenVertexesStack[iChildrenStackLength] = iY;
+				piVisitedVertexes[iY] = 1;
+				iChildrenStackLength++;
+			}
+		}
+		
+		if (!iStackLength) {
+			iDepthLevel++;
+			iStackLength = iChildrenStackLength;
+			memcpy(piVertexesStack, piChildrenVertexesStack, iArraySize);
+			iChildrenStackLength = 0;
+		}
+	} while(iStackLength);
+
+	free(piVertexesStack);
+	free(piChildrenVertexesStack);
+	free(piVisitedVertexes);
 }
 
 void fnTask3()
@@ -159,11 +208,11 @@ void fnTask3()
 	AdjacencyMatrix* poAdjacencyMatrix = fnAdjacencyMatrixLoadFromFile("am.txt");
 	
 	printf("Start with 0\n");
-	fnBFS(poAdjacencyMatrix, 0, 0, 0);
+	fnBFS(poAdjacencyMatrix, 0);
 
 	printf("\n");
 	printf("Start with 3\n");
-	fnBFS(poAdjacencyMatrix, 3, 0, 0);
+	fnBFS(poAdjacencyMatrix, 3);
 
 	fnAdjacencyMatrixClear(poAdjacencyMatrix);
 	
