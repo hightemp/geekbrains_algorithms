@@ -7,251 +7,171 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 /**
- * 1. 1. Попробовать оптимизировать пузырьковую сортировку.
- * Сравнить количество операций сравнения оптимизированной и не оптимизированной программы.
- * Написать функции сортировки, которые возвращают количество операций.
- * 2. *Реализовать шейкерную сортировку.
- * 3. Реализовать бинарный алгоритм поиска в виде функции,
- * которой передается отсортированный массив.
- * Функция возвращает индекс найденного элемента или -1, если элемент не найден.
- * 4. *Подсчитать количество операций для каждой из сортировок и сравнить его с асимптотической сложностью алгоритма.
+ * 1. Написать функции, которые считывают матрицу смежности из файла и выводят ее на экран
+ * 2. Написать рекурсивную функцию обхода графа в глубину.
+ * 3. Написать функцию обхода графа в ширину.
+ * 4. *Создать библиотеку функций для работы с графами.
  */
 
-int fnBubbleSort(int aiArray[10])
+typedef struct AdjacencyMatrix {
+	int *piArray;
+	int iSize;
+} AdjacencyMatrix;
+
+AdjacencyMatrix* fnAdjacencyMatrixCreate(int iSize)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	int iOperations = 0;
-	int iSwapped = 0;
-	iOperations += 1;
-
-	do {
-		iSwapped = 0;
-		iOperations += 1;
-
-		for (int iIndex=0; iIndex<9; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex]>aiArray[iIndex+1]) {
-				int Temp = aiArray[iIndex+1];
-				aiArray[iIndex+1] = aiArray[iIndex];
-				aiArray[iIndex] = Temp;
-
-				iSwapped = 1;
-
-				iOperations += 6;
-			}
-		}
-
-		iOperations += 1;
-	} while (iSwapped);
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
+	AdjacencyMatrix* poResult = (AdjacencyMatrix*) malloc(sizeof(AdjacencyMatrix));
+	poResult->piArray = (int*) malloc(sizeof(int)*iSize*iSize);
+	poResult->iSize = iSize;
 }
 
-int fnOptimizedBubbleSort(int aiArray[10])
+void fnAdjacencyMatrixClear(AdjacencyMatrix* poAdjacencyMatrix)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	int iOperations = 0;
-
-	int iLastSwap = 0;
-	int iCurrentSwap = 10;
-
-	do {
-		iLastSwap = 0;
-
-		for (int iIndex=1; iIndex<iCurrentSwap; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex-1]>aiArray[iIndex]) {
-				int Temp = aiArray[iIndex-1];
-				aiArray[iIndex-1] = aiArray[iIndex];
-				aiArray[iIndex] = Temp;
-				iOperations += 5;
-				iLastSwap = iIndex;
-			}
-		}
-
-		iOperations += 1;
-		iCurrentSwap = iLastSwap;
-
-		iOperations += 1;
-	} while(iCurrentSwap);
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
+	free(poAdjacencyMatrix->piArray);
 }
 
-int fnOptimizedBubbleSort2(int aiArray[10])
+AdjacencyMatrix* fnAdjacencyMatrixLoadFromFile(char* pcFilePath)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	FILE* poFileHandler = fopen(pcFilePath, "r");
+	
+	if (!poFileHandler) {
+		printf("Can't open file\n");
+		return 0;
 	}
-	printf("\n");
+	
+	int iSize = 0;
 
-	int iOperations = 0;
+	fscanf(poFileHandler, "%d ", &iSize);
 
-	for (int iIndex=0; iIndex<9; iIndex++) {
-		iOperations += 2;
+	AdjacencyMatrix* poAdjacencyMatrix = fnAdjacencyMatrixCreate(iSize);
+	
+	while (!feof(poFileHandler)) {
+		int iX = 0;
+		int iY = 0;
 
-		iOperations += 1;
-		if (aiArray[iIndex]>aiArray[iIndex+1]) {
-			int iTempIndex = iIndex+1;
-			iOperations += 2;
+		fscanf(poFileHandler, "%d %d ", &iX, &iY);
+		
+		poAdjacencyMatrix->piArray[iY*poAdjacencyMatrix->iSize+iX] = 1;
+		poAdjacencyMatrix->piArray[iX*poAdjacencyMatrix->iSize+iY] = 1;
+	}
+	
+	return poAdjacencyMatrix;
+}
 
-			do {
-				int Temp = aiArray[iTempIndex];
-				aiArray[iTempIndex] = aiArray[iTempIndex-1];
-				aiArray[iTempIndex-1] = Temp;
-				iTempIndex--;
-
-				iOperations += 9;
-			} while (iTempIndex>0 && aiArray[iTempIndex-1]>aiArray[iTempIndex]);
+void fnAdjacencyMatrixPrint(AdjacencyMatrix* poAdjacencyMatrix)
+{
+	int iX = 0;
+	int iY = 0;
+	
+	for (iY=0;iY<poAdjacencyMatrix->iSize;iY++) {
+		for (iX=0;iX<poAdjacencyMatrix->iSize;iX++) {
+			printf("%d ", poAdjacencyMatrix->piArray[iY*poAdjacencyMatrix->iSize+iX]);
 		}
+		printf("\n");
 	}
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
-	}
-	printf("\n");
-
-	return iOperations;
 }
 
 void fnTask1()
 {
-	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	int aiArray2[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
-	int aiArray3[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	printf("Reading adjacency matrix from file..\n");
+	
+	AdjacencyMatrix* poAdjacencyMatrix = fnAdjacencyMatrixLoadFromFile("am.txt");
+	
+	fnAdjacencyMatrixPrint(poAdjacencyMatrix);
 
-	printf("bubble sort operations: %d\n", fnBubbleSort(aiArray1));
-	printf("optimized bubble sort operations: %d\n", fnOptimizedBubbleSort(aiArray2));
-	printf("optimized bubble sort 2 operations: %d\n", fnOptimizedBubbleSort2(aiArray3));
+	fnAdjacencyMatrixClear(poAdjacencyMatrix);
+	
+	printf("\n");
 }
 
-int fnShakerSort(int aiArray[10])
+void fnPrintSpaces(int iCount)
 {
-	printf("before sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	int iIndex = 0;
+	for (;iIndex<iCount; iIndex++) {
+		printf(" ");
 	}
-	printf("\n");
+}
 
-	int iOperations = 0;
-
-	iOperations += 2;
-	for (int iLeftIndex=0, iRightIndex=9; iLeftIndex<iRightIndex;) {
-		iOperations += 1;
-
-		for (int iIndex=iLeftIndex; iIndex<iRightIndex; iIndex++) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex+1]<aiArray[iIndex]) {
-				int Temp = aiArray[iIndex];
-				aiArray[iIndex] = aiArray[iIndex+1];
-				aiArray[iIndex+1] = Temp;
-
-				iOperations += 5;
-			}
+void fnDFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex, int* iVisitedVertexes, int iDepthLevel)
+{
+	int bFirstRun = !iVisitedVertexes;
+	
+	if (bFirstRun) {
+		iVisitedVertexes = (int*) malloc(sizeof(int)*poAdjacencyMatrix->iSize);
+		memset(iVisitedVertexes, 0, sizeof(int)*poAdjacencyMatrix->iSize);
+	}
+	
+	iVisitedVertexes[iStartVertexIndex] = 1;
+	
+	fnPrintSpaces(iDepthLevel);
+	printf("Vertex %d\n", iStartVertexIndex);
+	
+	int iY = 0;
+	
+	for (iY = 0; iY<poAdjacencyMatrix->iSize; iY++) {
+		if (iY==iStartVertexIndex) {
+			continue;
 		}
-		iOperations += 1;
-		iRightIndex--;
-
-		for (int iIndex=iRightIndex; iIndex>iLeftIndex; iIndex--) {
-			iOperations += 2;
-
-			iOperations += 1;
-			if (aiArray[iIndex-1]>aiArray[iIndex]) {
-				int Temp = aiArray[iIndex];
-				aiArray[iIndex] = aiArray[iIndex-1];
-				aiArray[iIndex-1] = Temp;
-
-				iOperations += 5;
-			}
+		
+		int iIndex = iY*poAdjacencyMatrix->iSize+iStartVertexIndex;
+		
+		if (poAdjacencyMatrix->piArray[iIndex] && !iVisitedVertexes[iY]) {
+			fnDFS(poAdjacencyMatrix, iY, iVisitedVertexes, iDepthLevel+1);
 		}
-		iOperations += 1;
-		iLeftIndex++;
 	}
-
-	printf("after sort: ");
-	for (int iIndex=0; iIndex<10; iIndex++) {
-		printf("%d ", aiArray[iIndex]);
+	
+	if (bFirstRun) {
+		free(iVisitedVertexes);
 	}
-	printf("\n");
-
-	return iOperations;
 }
 
 void fnTask2()
 {
-	int aiArray1[10] = {3, 2, 1, 5, 6, 7, 4, 9, 8, 10};
+	printf("DFS\n");
+	printf("Reading adjacency matrix from file..\n");
+	
+	AdjacencyMatrix* poAdjacencyMatrix = fnAdjacencyMatrixLoadFromFile("am.txt");
+	
+	printf("Start with 0\n");
+	fnDFS(poAdjacencyMatrix, 0, 0, 0);
 
-	printf("shaker sort operations: %d\n", fnShakerSort(aiArray1));
+	printf("\n");
+	printf("Start with 3\n");
+	fnDFS(poAdjacencyMatrix, 3, 0, 0);
+
+	fnAdjacencyMatrixClear(poAdjacencyMatrix);
+	
+	printf("\n");
 }
 
-int fnBinarySearch(int aiArray[10], int iNumber)
+void fnBFS(AdjacencyMatrix* poAdjacencyMatrix, int iStartVertexIndex, int* iVisitedVertexes, int iDepthLevel)
 {
-	int iMiddleIndex = 10/2;
-	int iLeftIndex = 0, iRightIndex = 9;
-
-	do {
-		if (aiArray[iMiddleIndex]<iNumber) {
-			iLeftIndex = iMiddleIndex;
-			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
-		} else if (aiArray[iMiddleIndex]>iNumber) {
-			iRightIndex = iMiddleIndex;
-			iMiddleIndex = iLeftIndex + (iRightIndex - iLeftIndex)/2;
-		}
-
-		if (aiArray[iMiddleIndex]==iNumber) {
-			return iMiddleIndex;
-		}
-	} while (iRightIndex-iLeftIndex>1);
-
-	return -1;
+	
 }
 
 void fnTask3()
 {
-	int aiArray1[10] = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+	printf("BFS\n");
+	printf("Reading adjacency matrix from file..\n");
+	
+	AdjacencyMatrix* poAdjacencyMatrix = fnAdjacencyMatrixLoadFromFile("am.txt");
+	
+	printf("Start with 0\n");
+	fnBFS(poAdjacencyMatrix, 0, 0, 0);
 
-	printf("binary search number 5 index: %d\n", fnBinarySearch(aiArray1, 5));
-	printf("binary search number 45 index: %d\n", fnBinarySearch(aiArray1, 45));
-	printf("binary search number 7 index: %d\n", fnBinarySearch(aiArray1, 7));
-	printf("binary search number 30 index: %d\n", fnBinarySearch(aiArray1, 30));
+	printf("\n");
+	printf("Start with 3\n");
+	fnBFS(poAdjacencyMatrix, 3, 0, 0);
+
+	fnAdjacencyMatrixClear(poAdjacencyMatrix);
+	
+	printf("\n");
 }
 
 void fnTask4()
 {
-	//
 }
 
 
