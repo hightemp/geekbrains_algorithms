@@ -57,9 +57,32 @@ void fnTask1()
 	fnPrintArray(aiArray);
 }
 
-void fnQuickSort(int aiArray[])
+void fnQuickSort(int aiArray[], int iLength)
 {
+	int iLIndex = 0;
+	int iRIndex = iLength-1;
+	int iMiddleValue = aiArray[9/2];
+	int iTemp = 0;
 
+	do {
+		while(aiArray[iLIndex]<iMiddleValue) {
+			iLIndex++;
+		}
+		while(iMiddleValue<aiArray[iRIndex]) {
+			iRIndex--;
+		}
+
+		if (iLIndex <= iRIndex) {
+			iTemp = aiArray[iLIndex];
+			aiArray[iLIndex] = aiArray[iRIndex];
+			aiArray[iRIndex] = iTemp;
+			iLIndex++;
+			iRIndex--;
+		}
+	} while(iLIndex <= iRIndex);
+
+	if (0<iRIndex) fnQuickSort(aiArray, iRIndex);
+	if (iLIndex<iLength) fnQuickSort(aiArray+iLIndex, iLength-iLIndex);
 }
 
 void fnTask2()
@@ -70,7 +93,7 @@ void fnTask2()
 
 	fnPrintArray(aiArray);
 
-	fnQuickSort(aiArray);
+	fnQuickSort(aiArray, 9);
 
 	fnPrintArray(aiArray);
 }
