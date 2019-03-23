@@ -17,14 +17,62 @@
  * 5. Проанализировать время работы каждого из вида сортировок для 100, 10000, 1000000 элементов. Заполнить таблицу (см. методичку)
  */ 
 
+void fnPrintArray(int aiArray[])
+{
+	int iIndex = 0;
+	for (;iIndex<9; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
+	}
+	printf("\n");
+}
+
+void fnCountingSort(int aiArray[])
+{
+	int iIndex = 0;
+	int iCIndex = 0;
+	int aiC[9] = {0};
+	int iAIndex = 0;
+
+	for (iIndex = 0;iIndex<9;iIndex++) {
+		aiC[aiArray[iIndex]-1]++;
+	}
+	for (iCIndex = 1;iCIndex<10;iCIndex++) {
+		for (iIndex = 0;iIndex<aiC[iCIndex-1];iIndex++) {
+			aiArray[iAIndex] = iCIndex;
+			iAIndex++;
+		}
+	}
+}
+
 void fnTask1()
+{
+	int aiArray[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+
+	printf("Counting sort\n");
+
+	fnPrintArray(aiArray);
+
+	fnCountingSort(aiArray);
+
+	fnPrintArray(aiArray);
+}
+
+void fnQuickSort(int aiArray[])
 {
 
 }
 
 void fnTask2()
 {
+	int aiArray[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
+	printf("Quick sort\n");
+
+	fnPrintArray(aiArray);
+
+	fnQuickSort(aiArray);
+
+	fnPrintArray(aiArray);
 }
 
 void fnTask3()
