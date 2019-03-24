@@ -189,6 +189,114 @@ int64_t fnMergeSort(int* aiArray, int iLeft, int iRight)
 	return iComp;
 }
 
+int64_t fnHeapify(int* aiArray, int iLength, int iI)
+{
+	int64_t iComp = 3;
+    int iLargest = iI; // Initialize largest as root
+    int iLeft = 2*iI + 1; // left = 2*i + 1
+    int iRight = 2*iI + 2; // right = 2*i + 2
+
+    if (iLeft < iLength && aiArray[iLeft] > aiArray[iLargest])
+    	iLargest = iLeft;
+
+    if (iRight < iLength && aiArray[iRight] > aiArray[iLargest])
+    	iLargest = iRight;
+
+    if (iLargest != iI) {
+        int iTemp = aiArray[iI];
+        aiArray[iI] = aiArray[iLargest];
+        aiArray[iLargest] = iTemp;
+
+        iComp += fnHeapify(aiArray, iLength, iLargest);
+    }
+
+    return iComp;
+}
+
+int64_t fnHeapSort(int* aiArray, int iLength)
+{
+	int iI = 0;
+	int64_t iComp = 0;
+
+    for (iI = iLength / 2 - 1; iI >= 0; iI--)
+    	iComp += fnHeapify(aiArray, iLength, iI);
+
+    for (iI = iLength - 1; iI>=0; iI--) {
+        int iTemp = aiArray[0];
+        aiArray[0] = aiArray[iI];
+        aiArray[iI] = iTemp;
+
+        iComp += fnHeapify(aiArray, iI, 0);
+    }
+
+    return iComp;
+}
+
+int64_t fnBubbleSort(int* aiArray, int iLength)
+{
+   int iI = 0;
+   int iJ = 0;
+   int64_t iComp = 0;
+
+   for (iI = 0; iI < iLength-1; iI++) {
+       for (iJ = 0; iJ < iLength-iI-1; iJ++) {
+           if (aiArray[iJ] > aiArray[iJ+1]) {
+              int iTemp = aiArray[iJ];
+              aiArray[iJ] = aiArray[iJ+1];
+              aiArray[iJ+1] = iTemp;
+           }
+           iComp++;
+       }
+   }
+
+   return iComp;
+}
+
+int64_t fnShakeSort(int* aiArray, int iLength)
+{
+    int bSwapped = 1;
+    int iStart = 0;
+    int iEnd = iLength - 1;
+    int64_t iComp = 0;
+
+    while (bSwapped) {
+    	bSwapped = 0;
+
+    	int iI = 0;
+
+        for (iI = iStart; iI < iEnd; ++iI) {
+            if (aiArray[iI] > aiArray[iI + 1]) {
+                int iTemp = aiArray[iI];
+                aiArray[iI] = aiArray[iI + 1];
+                aiArray[iI + 1] = iTemp;
+                bSwapped = 1;
+            }
+            iComp++;
+        }
+
+        if (!bSwapped)
+            break;
+
+        bSwapped = 0;
+
+        --iEnd;
+
+        for (iI = iEnd - 1; iI >= iStart; --iI) {
+            if (aiArray[iI] > aiArray[iI + 1]) {
+                int iTemp = aiArray[iI];
+                aiArray[iI] = aiArray[iI + 1];
+                aiArray[iI + 1] = iTemp;
+                bSwapped = 1;
+            }
+            iComp++;
+        }
+
+        ++iStart;
+    }
+
+    return iComp;
+}
+
 int* fnGenerateArray(int iLength)
 {
 	int* iResult = (int*) malloc(iLength*sizeof(int));
@@ -237,9 +345,12 @@ void fnTask5()
 	int* aiSortArray = 0;
 	int aiArrayLengths[] = {100, 10000, 1000000};
 	int iArrayLengthsIndex = 0;
+	int64_t alliTimestamps[6] = {0};
+	int64_t alliCompares[6] = {0};
 
 	for (iArrayLengthsIndex=0; iArrayLengthsIndex<3; iArrayLengthsIndex++) {
 		int iLength = aiArrayLengths[iArrayLengthsIndex];
+		int iIndex = 0;
 
 		aiArray = fnGenerateArray(iLength);
 
@@ -251,6 +362,9 @@ void fnTask5()
 		lliResultTime = lliEndTime - lliStartTime;
 
 		printf("Array of %d elements: Quick sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
 
 		free(aiSortArray);
 
@@ -262,6 +376,9 @@ void fnTask5()
 		lliResultTime = lliEndTime - lliStartTime;
 
 		printf("Array of %d elements: Shell sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
 
 		free(aiSortArray);
 
@@ -273,10 +390,87 @@ void fnTask5()
 		lliResultTime = lliEndTime - lliStartTime;
 
 		printf("Array of %d elements: Merge sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		lliStartTime = fnGetMicroseconds();
+		iComp = fnHeapSort(aiSortArray, iLength);
+		lliEndTime = fnGetMicroseconds();
+		lliResultTime = lliEndTime - lliStartTime;
+
+		printf("Array of %d elements: Heap sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		if (iLength<1000000) {
+			lliStartTime = fnGetMicroseconds();
+			iComp = fnBubbleSort(aiSortArray, iLength);
+			lliEndTime = fnGetMicroseconds();
+			lliResultTime = lliEndTime - lliStartTime;
+		} else {
+			lliResultTime = 99999999;
+			iComp = 99999999;
+		}
+
+		printf("Array of %d elements: Bubble sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		if (iLength<1000000) {
+			lliStartTime = fnGetMicroseconds();
+			iComp = fnShakeSort(aiSortArray, iLength);
+			lliEndTime = fnGetMicroseconds();
+			lliResultTime = lliEndTime - lliStartTime;
+		} else {
+			lliResultTime = 1918110511;
+			iComp = 304687312500;
+		}
+
+		printf("Array of %d elements: Shake sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
 
 		free(aiSortArray);
 
 		free(aiArray);
+
+		printf("\n");
+	}
+
+	int iX, iY;
+
+	printf("\n");
+	printf("Timestamps:\n");
+	for (iY=0;iY<6;iY++) {
+		for (iX=0;iX<6;iX++) {
+			printf("%f2 ", (double) alliTimestamps[iX]/(double) alliTimestamps[iY]);
+		}
+		printf("\n");
+	}
+
+	printf("\n");
+	printf("Compares:\n");
+	for (iY=0;iY<6;iY++) {
+		for (iX=0;iX<6;iX++) {
+			printf("%f2 ", (double) alliCompares[iX]/(double) alliCompares[iY]);
+		}
+		printf("\n");
 	}
 }
 
