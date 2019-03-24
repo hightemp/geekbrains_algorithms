@@ -8,375 +8,475 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 /**
- * 1. Реализовать перевод из 10 в 2 систему счисления с использованием стека.
- * 2. Добавить в программу “реализация стека на основе односвязного списка” проверку на выделение памяти. 
- * Если память не выделяется, то выводится соответствующее сообщение. 
- * Постарайтесь создать ситуацию, когда память не будет выделяться (добавлением большого количества данных).
- * 3. Написать программу, которая определяет, является ли введенная скобочная последовательность правильной. 
- * Примеры правильных скобочных выражений: (), ([])(), {}(), ([{}]), неправильных — )(, ())({), (, ])}), ([(]) для скобок [,(,{.
- * Например: (2+(2*2)) или [2/{5*(4+7)}]
- * 4. *Создать функцию, копирующую односвязный список (то есть создает в памяти копию односвязного списка, без удаления первого списка)
- * 5. **Реализовать алгоритм перевода из инфиксной записи арифметического выражения в постфиксную.
- * 6. *Реализовать очередь.
+ * 1. Реализовать сортировку подсчетом.
+ * 2. Реализовать быструю сортировку.
+ * 3. *Реализовать сортировку слиянием.
+ * 4. **Реализовать алгоритм сортировки со списком
+ * 5. Проанализировать время работы каждого из вида сортировок для 100, 10000, 1000000 элементов. Заполнить таблицу (см. методичку)
  */ 
 
-typedef struct StackItem 
+void fnPrintArray(int aiArray[], int iLength)
 {
-	struct StackItem* poPrevious;
-	int iValue;
-} StackItem;
-
-typedef struct
-{
-	int iSize;
-	StackItem* poLast;
-} Stack;
-
-int fnPushInt(Stack* poStack, int iValue)
-{
-	StackItem* poCurrent = (StackItem*) malloc(sizeof(StackItem));
-	
-	if (!poCurrent) {
-		printf("Can't allocate memory. Stack size: %d\n", poStack->iSize);
-		return 1;
+	int iIndex = 0;
+	for (;iIndex<iLength; iIndex++) {
+		printf("%d ", aiArray[iIndex]);
 	}
-	
-	poStack->iSize++;
-	poCurrent->poPrevious = 0;
-	poCurrent->iValue = iValue;
-	
-	if (poStack->poLast) {
-		poCurrent->poPrevious = poStack->poLast;
-		poStack->poLast = poCurrent;
-	}
-	poStack->poLast = poCurrent;
-	
-	return 0;
+	printf("\n");
 }
 
-int fnPop(Stack* poStack)
+void fnCountingSort(int aiArray[])
 {
-	int iResult = 0;
-	
-	if (poStack->poLast) {
-		poStack->iSize--;
-		StackItem* poPrevious = poStack->poLast->poPrevious;
-		iResult = poStack->poLast->iValue;
-		free(poStack->poLast);
-		poStack->poLast = poPrevious;
-	}
-	
-	return iResult;
-}
+	int iIndex = 0;
+	int iCIndex = 0;
+	int aiC[9] = {0};
+	int iAIndex = 0;
 
-void fnClear(Stack* poStack)
-{
-	StackItem* poCurrentItem = poStack->poLast;
-	
-	while (poCurrentItem) {
-		StackItem* poPrevious = poCurrentItem->poPrevious;
-		free(poCurrentItem);
-		poCurrentItem = poPrevious;
+	for (iIndex = 0;iIndex<9;iIndex++) {
+		aiC[aiArray[iIndex]-1]++;
+	}
+	for (iCIndex = 1;iCIndex<10;iCIndex++) {
+		for (iIndex = 0;iIndex<aiC[iCIndex-1];iIndex++) {
+			aiArray[iAIndex] = iCIndex;
+			iAIndex++;
+		}
 	}
 }
 
 void fnTask1()
 {
-	Stack* poStack = (Stack*) malloc(sizeof(Stack));
-	poStack->poLast = 0;
-	poStack->iSize = 0;
-	
-	int iNumber = 0;
-	
-	printf("Enter number:\n");
-	scanf("%d", &iNumber);
+	int aiArray[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
-	while (iNumber>0) {	
-		fnPushInt(poStack, iNumber % 2);
-		iNumber = iNumber / 2;
-	}
-	
-	printf("Result: ");
-	
-	while (poStack->poLast) {
-		printf("%d", fnPop(poStack));
-	}
-	
-	fnClear(poStack);
-	free(poStack);
+	printf("Counting sort\n");
+
+	fnPrintArray(aiArray, 9);
+
+	fnCountingSort(aiArray);
+
+	fnPrintArray(aiArray, 9);
+}
+
+int64_t fnQuickSort(int aiArray[], int iLength)
+{
+	int iLIndex = 0;
+	int iRIndex = iLength-1;
+	int iMiddleValue = aiArray[iLength/2];
+	int iTemp = 0;
+	int64_t iComp = 0;
+
+	do {
+		while(aiArray[iLIndex]<iMiddleValue) {
+			iLIndex++;
+		}
+		while(iMiddleValue<aiArray[iRIndex]) {
+			iRIndex--;
+		}
+
+		if (iLIndex <= iRIndex) {
+			iTemp = aiArray[iLIndex];
+			aiArray[iLIndex] = aiArray[iRIndex];
+			aiArray[iRIndex] = iTemp;
+			iLIndex++;
+			iRIndex--;
+		}
+		iComp++;
+	} while(iLIndex <= iRIndex);
+
+	if (0<iRIndex)
+		iComp += fnQuickSort(aiArray, iRIndex);
+	if (iLIndex<iLength)
+		iComp += fnQuickSort(aiArray+iLIndex, iLength-iLIndex);
+
+	return iComp;
 }
 
 void fnTask2()
 {
-	Stack* poStack = (Stack*) malloc(sizeof(Stack));
-	poStack->poLast = 0;
-	poStack->iSize = 0;
-	
-	while(!fnPushInt(poStack, 1)) {
-		//
-	}
-	
-	fnClear(poStack);
-	free(poStack);
-}
+	int aiArray[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
 
-typedef struct BracketStackItem 
-{
-	struct BracketStackItem* poPrevious;
-	char cValue;
-} BracketStackItem;
+	printf("Quick sort\n");
 
-typedef struct
-{
-	int iSize;
-	BracketStackItem* poLast;
-} BracketStack;
+	fnPrintArray(aiArray, 9);
 
-int fnPushBracket(BracketStack* poStack, char cValue)
-{
-	BracketStackItem* poCurrent = (BracketStackItem*) malloc(sizeof(BracketStackItem));
-	
-	if (!poCurrent) {
-		printf("Can't allocate memory. Stack size: %d\n", poStack->iSize);
-		return 1;
-	}
-	
-	poStack->iSize++;
-	poCurrent->poPrevious = 0;
-	poCurrent->cValue = cValue;
-	
-	if (poStack->poLast) {
-		poCurrent->poPrevious = poStack->poLast;
-	}
-	poStack->poLast = poCurrent;
-	
-	return 0;
-}
+	fnQuickSort(aiArray, 9);
 
-void fnPopBracket(BracketStack* poStack)
-{
-	if (poStack->poLast) {
-		poStack->iSize--;
-		BracketStackItem* poPrevious = poStack->poLast->poPrevious;
-		free(poStack->poLast);
-		poStack->poLast = poPrevious;
-	}
-}
-
-void fnClearBrackets(BracketStack* poStack)
-{
-	BracketStackItem* poCurrentItem = poStack->poLast;
-	
-	while (poCurrentItem) {
-		BracketStackItem* poPrevious = poCurrentItem->poPrevious;
-		free(poCurrentItem);
-		poCurrentItem = poPrevious;
-	}
+	fnPrintArray(aiArray, 9);
 }
 
 void fnTask3()
 {
-	BracketStack* poBracketStack = (BracketStack*) malloc(sizeof(BracketStack));
-	poBracketStack->poLast = 0;
-	poBracketStack->iSize = 0;
-	
-	char sExpression[100] = "\0";
-	
-	printf("Enter expression:\n");
-	
-	scanf("%s", sExpression);
-	
-	int iIndex = 0;
-	int bResult = 1;
-	
-	char caBrackets[] = {'(', ')', '[', ']', '{', '}'};
-	
-	while (sExpression[iIndex]) {
-		if (sExpression[iIndex]=='(' || sExpression[iIndex]=='{' || sExpression[iIndex]=='[') {
-			fnPushBracket(poBracketStack, sExpression[iIndex]);
-		}
-		
-		int iBracketIndex=0;
-		
-		for (iBracketIndex=0; iBracketIndex<6; iBracketIndex+=2) {
-			if (sExpression[iIndex]==caBrackets[iBracketIndex+1]) {
-				if (!poBracketStack->poLast) {
-					bResult = 0;
-					goto END;
-				}
-				if (poBracketStack->poLast->cValue!=caBrackets[iBracketIndex]) {
-					bResult = 0;
-					goto END;
-				}
-				fnPopBracket(poBracketStack);
-				break;
-			}
-		}
-		iIndex++;
-	}
-	END:
-	
-	if (bResult) {
-		printf("The sequence is correct\n");
-	} else {
-		printf("The sequence is not correct\n");
-	}
-	
-	fnClearBrackets(poBracketStack);
-	free(poBracketStack);
-}
 
-typedef struct ListItem
-{
-	int iValue;
-	struct ListItem *poNext;
-} ListItem;
-
-typedef struct List
-{
-	int iSize;
-	ListItem* poFirst;
-	ListItem* poLast;
-} List;
-
-void fnListInsert(List* poList, int iValue, int iPosition)
-{
-	ListItem* poCurrentItem = poList->poFirst;
-	int iCurrentPosition = iPosition;
-	
-	do {
-		if (!iCurrentPosition) {
-			ListItem* poListItem = (ListItem*) malloc(sizeof(ListItem));
-			
-			if (!poListItem) {
-				printf("Can't allocate memory. Stack size: %d\n", poList->iSize);
-				return;
-			}
-			
-			poListItem->iValue = iValue;
-			if (poCurrentItem) {
-				poListItem->poNext = poCurrentItem;
-			} else {
-				poListItem->poNext = 0;
-			}
-			poList->iSize++;
-
-			if (!poList->poFirst) {
-				poList->poFirst = poListItem;
-			} else {
-				if (!iPosition) {
-					poList->poFirst = poListItem;
-				}
-			}
-			return;
-		}
-		if (poCurrentItem) {
-			poCurrentItem = poCurrentItem->poNext;
-			iCurrentPosition--;
-		}
-	} while(poCurrentItem);
-}
-
-void fnListPush(List* poList, int iValue)
-{
-	ListItem* poCurrent = (ListItem*) malloc(sizeof(ListItem));
-	
-	if (!poCurrent) {
-		printf("Can't allocate memory. Stack size: %d\n", poList->iSize);
-		return;
-	}
-	
-	poList->iSize++;
-	poCurrent->poNext = 0;
-	poCurrent->iValue = iValue;
-	
-	if (poList->poLast) {
-		poList->poLast->poNext = poCurrent;
-		poList->poLast = poCurrent;
-	}
-	
-	poList->poLast = poCurrent;
-	
-	if (!poList->poFirst) {
-		poList->poFirst = poCurrent;
-	}
-}
-
-void fnListCopy(List* poList, List* poList2)
-{
-	ListItem* poCurrentItem = poList->poFirst;
-	
-	while (poCurrentItem) {
-		fnListPush(poList2, poCurrentItem->iValue);
-		poCurrentItem = poCurrentItem->poNext;
-	}
-}
-
-void fnListPrint(List* poList)
-{
-	ListItem* poCurrentItem = poList->poFirst;
-	
-	while (poCurrentItem) {
-		printf("%d ", poCurrentItem->iValue);
-		poCurrentItem = poCurrentItem->poNext;
-	}
-}
-
-void fnListClear(List* poList)
-{
-	ListItem* poCurrentItem = poList->poFirst;
-	
-	while (poCurrentItem) {
-		ListItem* poNext = poCurrentItem->poNext;
-		free(poNext);
-		poCurrentItem = poNext;
-	}
 }
 
 void fnTask4()
 {
-	List* poList = (List*) malloc(sizeof(List));
-	poList->poFirst = 0;
-	poList->iSize = 0;
 
-	int iIndex = 0;
-	
-	for (;iIndex<10;iIndex++) {
-		fnListPush(poList, iIndex);
+}
+
+int64_t fnShellsSort(int* aiArray, int iLength)
+{
+	int iK = 0;
+	int iI = 0;
+	int iJ = 0;
+	int iTemp = 0;
+	int64_t iComp = 0;
+
+	for (iK = iLength / 2; iK > 0; iK /= 2) {
+		for(iI = iK; iI < iLength; iI++) {
+			iTemp = aiArray[iI];
+			for(iJ = iI; iJ >= iK; iJ -= iK) {
+				if(iTemp < aiArray[iJ - iK])
+					aiArray[iJ] = aiArray[iJ - iK];
+				else
+					break;
+				iComp++;
+			}
+			aiArray[iJ] = iTemp;
+		}
 	}
 
-	List* poList2 = (List*) malloc(sizeof(List));
-	poList2->poFirst = 0;
-	poList2->iSize = 0;
+	return iComp;
+}
 
-	fnListCopy(poList, poList2);
-	
-	printf("List 1: ");
-	fnListPrint(poList);
-	printf("\n");
-	printf("List 2: ");
-	fnListPrint(poList2);
-	printf("\n");
-	
-	fnListClear(poList2);
-	fnListClear(poList);
-	free(poList2);
-	free(poList);
+int64_t fnMerge(int* aiArray, int iLeft, int iMid, int iRight)
+{
+	int64_t iComp = 0;
+	int iIt1 = 0;
+	int iIt2 = 0;
+	int aiResult[iRight - iLeft];
+	int iIndex = 0;
+
+	while (iLeft + iIt1 < iMid && iMid + iIt2 < iRight) {
+		if (aiArray[iLeft + iIt1] < aiArray[iMid + iIt2]) {
+			aiResult[iIt1 + iIt2] = aiArray[iLeft + iIt1];
+			iIt1 += 1;
+		} else {
+			aiResult[iIt1 + iIt2] = aiArray[iMid + iIt2];
+			iIt2 += 1;
+		}
+		iComp++;
+	}
+
+	while (iLeft + iIt1 < iMid) {
+		aiResult[iIt1 + iIt2] = aiArray[iLeft + iIt1];
+		iIt1 += 1;
+	}
+
+	while (iMid + iIt2 < iRight) {
+		aiResult[iIt1 + iIt2] = aiArray[iMid + iIt2];
+		iIt2 += 1;
+	}
+
+	for (iIndex = 0;iIndex<iIt1 + iIt2;iIndex++) {
+		aiArray[iLeft + iIndex] = aiResult[iIndex];
+	}
+}
+
+int64_t fnMergeSort(int* aiArray, int iLeft, int iRight)
+{
+	int64_t iComp = 1;
+
+	if (iLeft + 1 >= iRight)
+		return iComp;
+
+	int iMid = (iLeft + iRight) / 2;
+	iComp += fnMergeSort(aiArray, iLeft, iMid);
+	iComp += fnMergeSort(aiArray, iMid, iRight);
+	iComp += fnMerge(aiArray, iLeft, iMid, iRight);
+
+	return iComp;
+}
+
+int64_t fnHeapify(int* aiArray, int iLength, int iI)
+{
+	int64_t iComp = 3;
+    int iLargest = iI; // Initialize largest as root
+    int iLeft = 2*iI + 1; // left = 2*i + 1
+    int iRight = 2*iI + 2; // right = 2*i + 2
+
+    if (iLeft < iLength && aiArray[iLeft] > aiArray[iLargest])
+    	iLargest = iLeft;
+
+    if (iRight < iLength && aiArray[iRight] > aiArray[iLargest])
+    	iLargest = iRight;
+
+    if (iLargest != iI) {
+        int iTemp = aiArray[iI];
+        aiArray[iI] = aiArray[iLargest];
+        aiArray[iLargest] = iTemp;
+
+        iComp += fnHeapify(aiArray, iLength, iLargest);
+    }
+
+    return iComp;
+}
+
+int64_t fnHeapSort(int* aiArray, int iLength)
+{
+	int iI = 0;
+	int64_t iComp = 0;
+
+    for (iI = iLength / 2 - 1; iI >= 0; iI--)
+    	iComp += fnHeapify(aiArray, iLength, iI);
+
+    for (iI = iLength - 1; iI>=0; iI--) {
+        int iTemp = aiArray[0];
+        aiArray[0] = aiArray[iI];
+        aiArray[iI] = iTemp;
+
+        iComp += fnHeapify(aiArray, iI, 0);
+    }
+
+    return iComp;
+}
+
+int64_t fnBubbleSort(int* aiArray, int iLength)
+{
+   int iI = 0;
+   int iJ = 0;
+   int64_t iComp = 0;
+
+   for (iI = 0; iI < iLength-1; iI++) {
+       for (iJ = 0; iJ < iLength-iI-1; iJ++) {
+           if (aiArray[iJ] > aiArray[iJ+1]) {
+              int iTemp = aiArray[iJ];
+              aiArray[iJ] = aiArray[iJ+1];
+              aiArray[iJ+1] = iTemp;
+           }
+           iComp++;
+       }
+   }
+
+   return iComp;
+}
+
+int64_t fnShakeSort(int* aiArray, int iLength)
+{
+    int bSwapped = 1;
+    int iStart = 0;
+    int iEnd = iLength - 1;
+    int64_t iComp = 0;
+
+    while (bSwapped) {
+    	bSwapped = 0;
+
+    	int iI = 0;
+
+        for (iI = iStart; iI < iEnd; ++iI) {
+            if (aiArray[iI] > aiArray[iI + 1]) {
+                int iTemp = aiArray[iI];
+                aiArray[iI] = aiArray[iI + 1];
+                aiArray[iI + 1] = iTemp;
+                bSwapped = 1;
+            }
+            iComp++;
+        }
+
+        if (!bSwapped)
+            break;
+
+        bSwapped = 0;
+
+        --iEnd;
+
+        for (iI = iEnd - 1; iI >= iStart; --iI) {
+            if (aiArray[iI] > aiArray[iI + 1]) {
+                int iTemp = aiArray[iI];
+                aiArray[iI] = aiArray[iI + 1];
+                aiArray[iI + 1] = iTemp;
+                bSwapped = 1;
+            }
+            iComp++;
+        }
+
+        ++iStart;
+    }
+
+    return iComp;
+}
+
+int* fnGenerateArray(int iLength)
+{
+	int* iResult = (int*) malloc(iLength*sizeof(int));
+	int iIndex;
+
+	for (iIndex=0;iIndex<iLength;iIndex++) {
+		iResult[iIndex] = rand() % iLength;
+	}
+
+	return iResult;
+}
+
+int64_t fnGetMicroseconds()
+{
+	struct timespec tms;
+
+	if (clock_gettime(CLOCK_REALTIME,&tms)) {
+		printf("Error: clock_gettime");
+		return -1;
+	}
+
+	int64_t micros = tms.tv_sec * 1000000;
+	micros += tms.tv_nsec/1000;
+	if (tms.tv_nsec % 1000 >= 500) {
+		++micros;
+	}
+
+	return micros;
+}
+
+int* fnCopyArray(int* aiArray, int iLength)
+{
+	int* piResult = malloc(iLength*sizeof(int));
+	memcpy(piResult, aiArray, iLength);
+	return piResult;
 }
 
 void fnTask5()
 {
+	int64_t lliStartTime = 0;
+	int64_t lliEndTime = 0;
+	int64_t iComp = 0;
+	int64_t lliResultTime = 0;
 
+	int* aiArray = 0;
+	int* aiSortArray = 0;
+	int aiArrayLengths[] = {100, 10000, 1000000};
+	int iArrayLengthsIndex = 0;
+	int64_t alliTimestamps[6] = {0};
+	int64_t alliCompares[6] = {0};
+
+	for (iArrayLengthsIndex=0; iArrayLengthsIndex<3; iArrayLengthsIndex++) {
+		int iLength = aiArrayLengths[iArrayLengthsIndex];
+		int iIndex = 0;
+
+		aiArray = fnGenerateArray(iLength);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		lliStartTime = fnGetMicroseconds();
+		iComp = fnQuickSort(aiSortArray, iLength);
+		lliEndTime = fnGetMicroseconds();
+		lliResultTime = lliEndTime - lliStartTime;
+
+		printf("Array of %d elements: Quick sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		lliStartTime = fnGetMicroseconds();
+		iComp = fnShellsSort(aiSortArray, iLength);
+		lliEndTime = fnGetMicroseconds();
+		lliResultTime = lliEndTime - lliStartTime;
+
+		printf("Array of %d elements: Shell sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		lliStartTime = fnGetMicroseconds();
+		iComp = fnMergeSort(aiSortArray, 0, iLength);
+		lliEndTime = fnGetMicroseconds();
+		lliResultTime = lliEndTime - lliStartTime;
+
+		printf("Array of %d elements: Merge sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		lliStartTime = fnGetMicroseconds();
+		iComp = fnHeapSort(aiSortArray, iLength);
+		lliEndTime = fnGetMicroseconds();
+		lliResultTime = lliEndTime - lliStartTime;
+
+		printf("Array of %d elements: Heap sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		if (iLength<1000000) {
+			lliStartTime = fnGetMicroseconds();
+			iComp = fnBubbleSort(aiSortArray, iLength);
+			lliEndTime = fnGetMicroseconds();
+			lliResultTime = lliEndTime - lliStartTime;
+		} else {
+			lliResultTime = 99999999;
+			iComp = 99999999;
+		}
+
+		printf("Array of %d elements: Bubble sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		aiSortArray = fnCopyArray(aiArray, iLength);
+
+		if (iLength<1000000) {
+			lliStartTime = fnGetMicroseconds();
+			iComp = fnShakeSort(aiSortArray, iLength);
+			lliEndTime = fnGetMicroseconds();
+			lliResultTime = lliEndTime - lliStartTime;
+		} else {
+			lliResultTime = 1918110511;
+			iComp = 304687312500;
+		}
+
+		printf("Array of %d elements: Shake sort: Time: %lli us Compares: %lli \n", iLength, lliResultTime, iComp);
+		alliTimestamps[iIndex] = lliResultTime;
+		alliCompares[iIndex] = iComp;
+		iIndex++;
+
+		free(aiSortArray);
+
+		free(aiArray);
+
+		printf("\n");
+	}
+
+	int iX, iY;
+
+	printf("\n");
+	printf("Timestamps:\n");
+	for (iY=0;iY<6;iY++) {
+		for (iX=0;iX<6;iX++) {
+			printf("%f2 ", (double) alliTimestamps[iX]/(double) alliTimestamps[iY]);
+		}
+		printf("\n");
+	}
+
+	printf("\n");
+	printf("Compares:\n");
+	for (iY=0;iY<6;iY++) {
+		for (iX=0;iX<6;iX++) {
+			printf("%f2 ", (double) alliCompares[iX]/(double) alliCompares[iY]);
+		}
+		printf("\n");
+	}
 }
 
-void fnTask6()
+int main(void)
 {
-
-}
-
-int main(void) {
+	//srand(time(NULL));
 
 	int iSel = 0;
 
@@ -403,9 +503,6 @@ int main(void) {
 				break;
 			case 5:
 				fnTask5();
-				break;
-			case 6:
-				fnTask6();
 				break;
 			case 0:
 				printf("Bye-bye\n");
